@@ -23,9 +23,9 @@ refresh_bearer = JwtRefreshBearer(secret_key=settings.jwt.refresh_secret_key)
 async def create_liability(
     body: LiabilityCreate,
     uow: UnitOfWork = Depends(Provide["repositories.uow"]),
-    # credentials: JwtAuthorizationCredentials = Security(access_bearer),
+    credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> Liability:
-    user_id = UUID('aad6c949-efce-4cdf-aa18-b48eed088310')
+    user_id = credentials["id"]
     async with uow:
         liability = Liability(
             liability_template_id=body.liability_template_id,
