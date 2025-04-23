@@ -4,7 +4,6 @@ from alembic import context
 from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import SQLModel
 
-import src.data.models
 from src.config import Settings
 
 target_metadata = SQLModel.metadata

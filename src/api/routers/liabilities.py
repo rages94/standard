@@ -55,7 +55,6 @@ async def list_liabilities(
     return liabilities
 
 
-
 @liability_router.patch(
     "/{liability_id}",
     responses={200: {"model": Liability}},

@@ -8,6 +8,7 @@ from src.config import Settings
 from src.data.models import CompletedStandard
 from src.data.models.completed_standard import CompletedStandardCreate, CompletedStandardUpdate
 from src.data.uow import UnitOfWork
+from src.domain.completed_standards.dto.output import GroupedCompletedStandard
 
 settings = Settings()
 completed_standard_router = APIRouter()
@@ -52,8 +53,20 @@ async def list_completed_standards(
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> list[CompletedStandard]:
     async with uow:
-        liabilities = await uow.completed_standard_repo.filter({"user_id": credentials["id"]})
-    return liabilities
+        return await uow.completed_standard_repo.filter({"user_id": credentials["id"]})
+
+
+@completed_standard_router.get(
+    "/grouped/",
+    responses={200: {"model": GroupedCompletedStandard}},
+)
+@inject
+async def list_grouped_completed_standards(
+    uow: UnitOfWork = Depends(Provide["repositories.uow"]),
+    credentials: JwtAuthorizationCredentials = Security(access_bearer),
+) -> GroupedCompletedStandard:
+    async with uow:
+        return await uow.completed_standard_repo.grouped_list(UUID(credentials["id"]))
 
 
 @completed_standard_router.patch(
@@ -77,7 +90,7 @@ async def update_completed_standard(
         uow.completed_standard_repo.add(completed_standard)
 
         await uow.flush()
-        await uow.user_repo.update_total_liabilities(user_id)
+        await uow.user_repo.update_total_liabilities(user_id)  # TODO events
         await uow.commit()
         await uow.refresh(completed_standard)
     return completed_standard

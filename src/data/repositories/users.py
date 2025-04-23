@@ -7,7 +7,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy_filterset import BaseFilterSet, Filter, LimitOffsetFilter, OrderingFilter, OrderingField
 
 from src.common.repository.base import Repository
-from src.data.models import User, Liability, LiabilityTemplate, CompletedStandard
+from src.data.models import User, Liability, CompletedStandard
 
 
 class UserFilterSet(BaseFilterSet):
