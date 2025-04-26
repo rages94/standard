@@ -20,7 +20,7 @@ class User(SQLModel, table=True):
     hashed_password: str
     created_at: datetime = Field(default_factory=datetime.now)
     total_liabilities: int = Field(default=0, nullable=True)
-    completed_type: str = Field(CompletedType.count, nullable=True)
+    completed_type: str = Field(CompletedType.count.value, nullable=True)
 
     completed_standards: list["CompletedStandard"] = Relationship(back_populates="user")
     liabilities: list["Liability"] = Relationship(back_populates="user")
