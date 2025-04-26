@@ -23,4 +23,4 @@ class StandardRepository(
 ):
     model = Standard
     filter_set = StandardFilterSet
-    query = select(Standard)
+    query = select(Standard).where(Standard.is_deleted.is_(False))
