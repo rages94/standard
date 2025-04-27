@@ -34,9 +34,10 @@ class CompletedStandardRepository(
         query = select(
             Standard.name,
             func.date_trunc("day", CompletedStandard.created_at).label('date_created'),
-            func.sum(CompletedStandard.count) if as_standard else func.sum(CompletedStandard.count) / Standard.count,
+            func.sum(CompletedStandard.count) if not as_standard else func.sum(CompletedStandard.count) / Standard.count,
         ).join(CompletedStandard.standard).group_by(
             Standard.name,
+            Standard.count,
             'date_created',
         ).where(CompletedStandard.user_id == user_id).order_by("date_created")
         results = (await self.session.execute(query)).all()
