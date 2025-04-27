@@ -2,6 +2,7 @@ from uuid import UUID
 
 from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, Security, Depends
+from fastapi.params import Query
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer, JwtRefreshBearer
 
 from src.config import Settings
@@ -29,15 +30,18 @@ async def create_completed_standard(
     user_id = credentials["id"]
     async with uow:
         standard = await uow.standard_repo.get_one(dict(id=body.standard_id))
+        standard_count = body.count if not body.completed_type_is_count() else body.count // standard.count
+        count = body.count if body.completed_type_is_count() else body.count * standard.count
         completed_standard = CompletedStandard(
             standard_id=body.standard_id,
-            count=body.count if body.completed_type_is_count() else body.count * standard.count,
+            count=count,
             user_id=user_id,
         )
         uow.completed_standard_repo.add(completed_standard)
 
         await uow.flush()
         await uow.user_repo.update_total_liabilities(user_id)
+        await uow.credit_repo.update_completed_count(user_id, standard_count)
         await uow.commit()
         await uow.refresh(completed_standard)
     return completed_standard
@@ -64,9 +68,10 @@ async def list_completed_standards(
 async def list_grouped_completed_standards(
     uow: UnitOfWork = Depends(Provide["repositories.uow"]),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
+    as_standard: bool = Query(False),
 ) -> GroupedCompletedStandard:
     async with uow:
-        return await uow.completed_standard_repo.grouped_list(UUID(credentials["id"]))
+        return await uow.completed_standard_repo.grouped_list(UUID(credentials["id"]), as_standard)
 
 
 @completed_standard_router.patch(
@@ -91,6 +96,7 @@ async def update_completed_standard(
 
         await uow.flush()
         await uow.user_repo.update_total_liabilities(user_id)  # TODO events
+        # TODO update credit
         await uow.commit()
         await uow.refresh(completed_standard)
     return completed_standard
@@ -113,5 +119,6 @@ async def delete_completed_standard(
         )
         await uow.completed_standard_repo.delete(completed_standard_id)
         await uow.flush()
-        await uow.user_repo.update_total_liabilities(user_id)
+        await uow.user_repo.update_total_liabilities(user_id)  # TODO events
+        # TODO update credit
         await uow.commit()

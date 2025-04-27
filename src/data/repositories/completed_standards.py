@@ -30,11 +30,11 @@ class CompletedStandardRepository(
     filter_set = CompletedStandardFilterSet
     query = select(CompletedStandard)
 
-    async def grouped_list(self, user_id: UUID) -> GroupedCompletedStandard:
+    async def grouped_list(self, user_id: UUID, as_standard: bool = False) -> GroupedCompletedStandard:
         query = select(
             Standard.name,
             func.date_trunc("day", CompletedStandard.created_at).label('date_created'),
-            func.sum(CompletedStandard.count),
+            func.sum(CompletedStandard.count) if as_standard else func.sum(CompletedStandard.count) / Standard.count,
         ).join(CompletedStandard.standard).group_by(
             Standard.name,
             'date_created',

@@ -4,6 +4,7 @@ from src.data.repositories.liabilities import LiabilityRepository
 from src.data.repositories.liability_templates import LiabilityTemplateRepository
 from src.data.repositories.standards import StandardRepository
 from src.data.repositories.users import UserRepository
+from src.data.repositories.credits import CreditRepository
 
 
 class UnitOfWork(BaseUnitOfWork):
@@ -14,3 +15,4 @@ class UnitOfWork(BaseUnitOfWork):
         self.liability_template_repo = LiabilityTemplateRepository(self.session)
         self.completed_standard_repo = CompletedStandardRepository(self.session)
         self.standard_repo = StandardRepository(self.session)
+        self.credit_repo = CreditRepository(self.session)
