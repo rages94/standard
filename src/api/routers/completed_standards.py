@@ -4,6 +4,7 @@ from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, Security, Depends
 from fastapi.params import Query
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer, JwtRefreshBearer
+from sqlalchemy.exc import NoResultFound
 
 from src.config import Settings
 from src.data.models import CompletedStandard
@@ -41,7 +42,10 @@ async def create_completed_standard(
 
         await uow.flush()
         await uow.user_repo.update_total_liabilities(user_id)
-        await uow.credit_repo.update_completed_count(user_id, standard_count)
+        try:
+            await uow.credit_repo.update_completed_count(user_id, standard_count)
+        except NoResultFound:
+            pass
         await uow.commit()
         await uow.refresh(completed_standard)
     return completed_standard
