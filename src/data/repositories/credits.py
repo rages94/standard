@@ -41,3 +41,5 @@ class CreditRepository(
         result = await self.session.execute(filtered_query)
         if result.rowcount != 1:
             raise NoResultFound
+
+        self.session.flush()
