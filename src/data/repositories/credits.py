@@ -35,11 +35,11 @@ class CreditRepository(
         params = dict(user_id=user_id, deadline_date_ge=datetime.now())
         query = (
             update(Credit)
-            .values({'completed_count': completed_count})
+            .values({'completed_count': Credit.completed_count + completed_count})
         )
         filtered_query = self.filter_set(query).filter_query(params)  # noqa
         result = await self.session.execute(filtered_query)
         if result.rowcount != 1:
             raise NoResultFound
 
-        self.session.flush()
+        async self.session.flush()
