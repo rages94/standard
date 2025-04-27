@@ -42,4 +42,4 @@ class CreditRepository(
         if result.rowcount != 1:
             raise NoResultFound
 
-        async self.session.flush()
+        await self.session.flush()
