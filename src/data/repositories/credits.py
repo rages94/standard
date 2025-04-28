@@ -1,7 +1,8 @@
 import operator as op
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import UUID
 
+from dateutil.relativedelta import relativedelta
 from sqlalchemy import select, update
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -42,4 +43,23 @@ class CreditRepository(
         if result.rowcount != 1:
             raise NoResultFound
 
+        await self.session.flush()
+
+    async def create_by_user(self, user_id: UUID, total_liabilities: int) -> None:
+        params = dict(user_id=user_id, deadline_date_ge=datetime.now())
+        try:
+            await self.get_one(params)
+            return
+        except NoResultFound:
+            pass
+
+        now = datetime.now()
+        count_credit_months = 13 - now.month
+        credit = Credit(
+            count=total_liabilities//count_credit_months,
+            user_id=user_id,
+            completed_count=0,
+            deadline_date=now.date() + relativedelta(months=1),
+        )
+        self.session.add(credit)
         await self.session.flush()
