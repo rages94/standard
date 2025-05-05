@@ -6,8 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_filterset import BaseFilterSet, Filter, LimitOffsetFilter, OrderingFilter, OrderingField
 
 from src.common.repository.base import Repository
-from src.data.models import CompletedStandard, Standard
-from src.domain.completed_standards.dto.output import GroupedCompletedStandard, Dataset
+from src.data.models import CompletedStandard, Standard, User
+from src.domain.completed_standards.dto.output import (
+    GroupedCompletedStandard,
+    Dataset,
+    RatingGroupedCompletedStandard,
+    UserCompletedStandard,
+)
 
 
 class CompletedStandardFilterSet(BaseFilterSet):
@@ -53,3 +58,21 @@ class CompletedStandardRepository(
                 values.append(v.get(name, 0))
             result.datasets.append(Dataset(label=name, data=values))
         return result
+
+    async def rating_all_time(self) -> list[RatingGroupedCompletedStandard]:
+        query = select(
+            User.username,
+            Standard.name,
+            func.sum(CompletedStandard.count)
+        ).join(CompletedStandard.standard).join(CompletedStandard.user).group_by(
+            User.username,
+            Standard.name,
+        ).where(Standard.is_deleted == False).order_by(Standard.created_at, func.sum(CompletedStandard.count).desc())
+        results = (await self.session.execute(query)).all()
+        data = defaultdict(list)
+        for username, standard_name, count in results:
+            data[standard_name].append(UserCompletedStandard(username=username, count=count))
+        return [
+            RatingGroupedCompletedStandard(standard_name=standard_name, user_ratings=ratings)
+            for standard_name, ratings in data.items()
+        ]

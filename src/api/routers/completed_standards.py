@@ -10,7 +10,7 @@ from src.config import Settings
 from src.data.models import CompletedStandard
 from src.data.models.completed_standard import CompletedStandardCreate, CompletedStandardUpdate
 from src.data.uow import UnitOfWork
-from src.domain.completed_standards.dto.output import GroupedCompletedStandard
+from src.domain.completed_standards.dto.output import GroupedCompletedStandard, RatingGroupedCompletedStandard
 
 settings = Settings()
 completed_standard_router = APIRouter()
@@ -76,6 +76,19 @@ async def list_grouped_completed_standards(
 ) -> GroupedCompletedStandard:
     async with uow:
         return await uow.completed_standard_repo.grouped_list(UUID(credentials["id"]), as_standard)
+
+
+@completed_standard_router.get(
+    "/rating/",
+    responses={200: {"model": GroupedCompletedStandard}},
+)
+@inject
+async def completed_standards_rating_list(
+    uow: UnitOfWork = Depends(Provide["repositories.uow"]),
+    credentials: JwtAuthorizationCredentials = Security(access_bearer),
+) -> list[RatingGroupedCompletedStandard]:
+    async with uow:
+        return await uow.completed_standard_repo.rating_all_time()
 
 
 @completed_standard_router.patch(

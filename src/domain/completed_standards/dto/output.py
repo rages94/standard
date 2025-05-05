@@ -11,3 +11,13 @@ class Dataset(BaseModel):
 class GroupedCompletedStandard(BaseModel):
     labels: list[date]
     datasets: list[Dataset]
+
+
+class UserCompletedStandard(BaseModel):
+    username: str
+    count: int
+
+
+class RatingGroupedCompletedStandard(BaseModel):
+    standard_name: str
+    user_ratings: list[UserCompletedStandard]

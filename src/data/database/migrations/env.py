@@ -5,7 +5,7 @@ from sqlalchemy.ext.asyncio import create_async_engine
 from sqlmodel import SQLModel
 
 from src.config import Settings
-from src.data.models import *
+from src.data.models import *  # noqa: F403
 
 target_metadata = SQLModel.metadata
 settings = Settings()

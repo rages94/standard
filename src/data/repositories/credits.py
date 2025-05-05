@@ -1,5 +1,5 @@
 import operator as op
-from datetime import datetime, timedelta
+from datetime import datetime
 from uuid import UUID
 
 from dateutil.relativedelta import relativedelta
