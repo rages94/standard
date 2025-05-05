@@ -67,7 +67,7 @@ class CompletedStandardRepository(
         ).join(CompletedStandard.standard).join(CompletedStandard.user).group_by(
             User.username,
             Standard.name,
-        ).where(Standard.is_deleted == False).order_by(Standard.created_at, func.sum(CompletedStandard.count).desc())
+        ).where(Standard.is_deleted == False).order_by(func.sum(CompletedStandard.count).desc())  # TODO Standard.created_at
         results = (await self.session.execute(query)).all()
         data = defaultdict(list)
         for username, standard_name, count in results:
