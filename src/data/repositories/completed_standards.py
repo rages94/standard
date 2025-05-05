@@ -1,4 +1,5 @@
 from collections import defaultdict
+from datetime import timedelta, datetime
 from uuid import UUID
 
 from sqlalchemy import select, func
@@ -59,7 +60,7 @@ class CompletedStandardRepository(
             result.datasets.append(Dataset(label=name, data=values))
         return result
 
-    async def rating_all_time(self) -> list[RatingGroupedCompletedStandard]:
+    async def rating_list(self, days: int | None = None) -> list[RatingGroupedCompletedStandard]:
         query = select(
             User.username,
             Standard.name,
@@ -67,7 +68,9 @@ class CompletedStandardRepository(
         ).join(CompletedStandard.standard).join(CompletedStandard.user).group_by(
             User.username,
             Standard.name,
-        ).where(Standard.is_deleted == False).order_by(func.sum(CompletedStandard.count).desc())  # TODO Standard.created_at
+        ).where(Standard.is_deleted == False).order_by(func.sum(CompletedStandard.count).desc())
+        if days:
+            query = query.filter(CompletedStandard.created_at >= datetime.now() - timedelta(days=days))
         results = (await self.session.execute(query)).all()
         data = defaultdict(list)
         for username, standard_name, count in results:

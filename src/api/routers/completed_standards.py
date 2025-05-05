@@ -86,9 +86,10 @@ async def list_grouped_completed_standards(
 async def completed_standards_rating_list(
     uow: UnitOfWork = Depends(Provide["repositories.uow"]),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
+    days: int | None = Query(None),
 ) -> list[RatingGroupedCompletedStandard]:
     async with uow:
-        return await uow.completed_standard_repo.rating_all_time()
+        return await uow.completed_standard_repo.rating_list(days)
 
 
 @completed_standard_router.patch(
