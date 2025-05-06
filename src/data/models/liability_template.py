@@ -33,3 +33,4 @@ class LiabilityTemplateUpdate(SQLModel):
 class LiabilityTemplatePublic(SQLModel):
     id: UUID
     name: str
+    count: int

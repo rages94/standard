@@ -32,3 +32,4 @@ class StandardUpdate(SQLModel):
 class StandardPublic(SQLModel):
     id: UUID
     name: str
+    count: int
