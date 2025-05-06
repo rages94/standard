@@ -21,15 +21,15 @@ class Standard(SQLModel, table=True):
 
 class StandardCreate(SQLModel):
     name: str
-    count: int
+    count: Decimal
 
 
 class StandardUpdate(SQLModel):
     name: str | None = None
-    count: int | None = None
+    count: Decimal | None = None
 
 
 class StandardPublic(SQLModel):
     id: UUID
     name: str
-    count: int
+    count: Decimal
