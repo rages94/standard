@@ -82,7 +82,8 @@ class CompletedStandardRepository(
             all_standards[username] += round(standards)
         data["Все упражнения"] = sorted(
             [UserCompletedStandard(username=u, count=0, standards=s) for u, s in all_standards.items()],
-            key=lambda x: x.standards
+            key=lambda x: x.standards,
+            reverse=True,
         )
         return [
             RatingGroupedCompletedStandard(standard_name=standard_name, user_ratings=ratings)
