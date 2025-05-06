@@ -65,17 +65,19 @@ class CompletedStandardRepository(
         query = select(
             User.username,
             Standard.name,
-            func.sum(CompletedStandard.count)
+            func.sum(CompletedStandard.count),
+            func.sum(CompletedStandard.count) / Standard.count,
         ).join(CompletedStandard.standard).join(CompletedStandard.user).group_by(
             User.username,
             Standard.name,
+            Standard.count,
         ).where(Standard.is_deleted == False).order_by(func.sum(CompletedStandard.count).desc())
         if days:
             query = query.filter(CompletedStandard.created_at >= datetime.now() - timedelta(days=days))
         results = (await self.session.execute(query)).all()
         data = defaultdict(list)
-        for username, standard_name, count in results:
-            data[standard_name].append(UserCompletedStandard(username=username, count=count))
+        for username, standard_name, count, standards in results:
+            data[standard_name].append(UserCompletedStandard(username=username, count=count, standards=round(standards)))
         return [
             RatingGroupedCompletedStandard(standard_name=standard_name, user_ratings=ratings)
             for standard_name, ratings in data.items()

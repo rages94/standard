@@ -17,6 +17,7 @@ class GroupedCompletedStandard(BaseModel):
 class UserCompletedStandard(BaseModel):
     username: str
     count: int
+    standards: int
 
 
 class RatingGroupedCompletedStandard(BaseModel):
