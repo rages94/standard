@@ -28,3 +28,8 @@ class LiabilityTemplateCreate(SQLModel):
 class LiabilityTemplateUpdate(SQLModel):
     name: str | None = None
     count: int | None = None
+
+
+class LiabilityTemplatePublic(SQLModel):
+    id: UUID
+    name: str

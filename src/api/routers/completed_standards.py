@@ -10,7 +10,11 @@ from src.config import Settings
 from src.data.models import CompletedStandard
 from src.data.models.completed_standard import CompletedStandardCreate, CompletedStandardUpdate
 from src.data.uow import UnitOfWork
-from src.domain.completed_standards.dto.output import GroupedCompletedStandard, RatingGroupedCompletedStandard
+from src.domain.completed_standards.dto.output import (
+    GroupedCompletedStandard,
+    RatingGroupedCompletedStandard,
+    CompletedStandardListResponse,
+)
 
 settings = Settings()
 completed_standard_router = APIRouter()
@@ -53,16 +57,27 @@ async def create_completed_standard(
 
 @completed_standard_router.get(
     "/",
-    responses={200: {"model": list[CompletedStandard]}},
+    responses={200: {"model": CompletedStandardListResponse}},
 )
 @inject
 async def list_completed_standards(
     uow: UnitOfWork = Depends(Provide["repositories.uow"]),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
-) -> list[CompletedStandard]:
+    limit: int = Query(10),
+    offset: int = Query(0),
+) -> CompletedStandardListResponse:
+    params = dict(
+        user_id=credentials["id"],
+        pagination=(limit, offset)
+    )
     async with uow:
-        return await uow.completed_standard_repo.filter({"user_id": credentials["id"]})
-
+        count = await uow.completed_standard_repo.count(params)
+        completed_standards = await uow.completed_standard_repo.filter(params)
+    return CompletedStandardListResponse(
+        data=completed_standards,
+        count=count,
+        next_page=count > limit + offset
+    )
 
 @completed_standard_router.get(
     "/grouped/",

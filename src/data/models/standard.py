@@ -27,3 +27,8 @@ class StandardCreate(SQLModel):
 class StandardUpdate(SQLModel):
     name: str | None = None
     count: int | None = None
+
+
+class StandardPublic(SQLModel):
+    id: UUID
+    name: str

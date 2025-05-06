@@ -4,6 +4,7 @@ from uuid import UUID
 
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 from sqlalchemy_filterset import BaseFilterSet, Filter, LimitOffsetFilter, OrderingFilter, OrderingField
 
 from src.common.repository.base import Repository
@@ -34,7 +35,7 @@ class CompletedStandardRepository(
 ):
     model = CompletedStandard
     filter_set = CompletedStandardFilterSet
-    query = select(CompletedStandard)
+    query = select(CompletedStandard).options(joinedload(CompletedStandard.standard)).order_by(CompletedStandard.created_at.desc())
 
     async def grouped_list(self, user_id: UUID, as_standard: bool = False) -> GroupedCompletedStandard:
         query = select(

@@ -4,6 +4,8 @@ from uuid import UUID, uuid4
 
 from sqlmodel import SQLModel, Field, Relationship
 
+from src.data.models.liability_template import LiabilityTemplatePublic
+
 if TYPE_CHECKING:
     from src.data.models import User, LiabilityTemplate
 
@@ -27,3 +29,10 @@ class LiabilityCreate(SQLModel):
 class LiabilityUpdate(SQLModel):
     liability_template_id: UUID | None = None
     count: int | None = None
+
+
+class LiabilityPublic(SQLModel):
+    id: UUID
+    count: int
+    created_at: datetime
+    liability_template: LiabilityTemplatePublic

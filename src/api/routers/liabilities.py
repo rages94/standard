@@ -1,13 +1,14 @@
 from uuid import UUID
 
 from dependency_injector.wiring import inject, Provide
-from fastapi import APIRouter, Security, Depends
+from fastapi import APIRouter, Security, Depends, Query
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer, JwtRefreshBearer
 
 from src.config import Settings
 from src.data.models import Liability
 from src.data.models.liability import LiabilityCreate, LiabilityUpdate
 from src.data.uow import UnitOfWork
+from src.domain.liabilities.dto.output import LiabilitiesListResponse
 
 settings = Settings()
 liability_router = APIRouter()
@@ -43,16 +44,27 @@ async def create_liability(
 
 @liability_router.get(
     "/",
-    responses={200: {"model": list[Liability]}},
+    responses={200: {"model": LiabilitiesListResponse}},
 )
 @inject
 async def list_liabilities(
     uow: UnitOfWork = Depends(Provide["repositories.uow"]),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
-) -> list[Liability]:
+    limit: int = Query(10),
+    offset: int = Query(0),
+) -> LiabilitiesListResponse:
+    params = dict(
+        user_id=credentials["id"],
+        pagination=(limit, offset)
+    )
     async with uow:
-        liabilities = await uow.liability_repo.filter({"user_id": credentials["id"]})
-    return liabilities
+        count = await uow.liability_repo.count(params)
+        liabilities = await uow.liability_repo.filter(params)
+    return LiabilitiesListResponse(
+        data=liabilities,
+        count=count,
+        next_page=count > limit + offset
+    )
 
 
 @liability_router.patch(

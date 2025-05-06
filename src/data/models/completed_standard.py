@@ -4,6 +4,7 @@ from uuid import UUID, uuid4
 
 from sqlmodel import SQLModel, Field, Relationship
 
+from src.data.models.standard import StandardPublic
 from src.domain.user.dto.enums import CompletedType
 
 if TYPE_CHECKING:
@@ -34,3 +35,10 @@ class CompletedStandardCreate(SQLModel):
 class CompletedStandardUpdate(SQLModel):
     standard_id: UUID | None = None
     count: int | None = None
+
+
+class CompletedStandardPublic(SQLModel):
+    id: UUID
+    count: int
+    created_at: datetime
+    standard: StandardPublic

@@ -1,5 +1,6 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 from sqlalchemy_filterset import BaseFilterSet, Filter, LimitOffsetFilter, OrderingFilter, OrderingField
 
 from src.common.repository.base import Repository
@@ -24,4 +25,4 @@ class LiabilityRepository(
 ):
     model = Liability
     filter_set = LiabilityFilterSet
-    query = select(Liability)
+    query = select(Liability).options(joinedload(Liability.liability_template)).order_by(Liability.created_at.desc())

@@ -6,4 +6,4 @@ from src.data.uow import UnitOfWork
 class RepositoriesContainer(containers.DeclarativeContainer):
     config = providers.Configuration()
     gateways = providers.DependenciesContainer()
-    uow = providers.Singleton(UnitOfWork, db=gateways.db)
+    uow = providers.Factory(UnitOfWork, db=gateways.db)
