@@ -52,7 +52,7 @@ class CompletedStandardRepository(
         names = set()
         for name, date_created, count in results:
             names.add(name)
-            data[date_created][name] = count
+            data[date_created][name] = round(count)
         result = GroupedCompletedStandard(labels=data.keys(), datasets=[])
         for name in names:
             values = []
