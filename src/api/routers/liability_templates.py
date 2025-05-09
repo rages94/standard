@@ -46,7 +46,7 @@ async def list_liability_templates(
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> list[LiabilityTemplate]:
     async with uow:
-        return await uow.liability_template_repo.filter({})  # {"user_id": credentials["id"]}
+        return await uow.liability_template_repo.filter({"user_id": credentials["id"]})
 
 
 @liability_template_router.patch(
@@ -87,8 +87,9 @@ async def delete_liability_template(
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> None:
     async with uow:
-        await uow.liability_template_repo.get_one(
+        liability_template = await uow.liability_template_repo.get_one(
             {"id": liability_template_id, "user_id": credentials["id"]}
         )
-        await uow.liability_template_repo.delete(liability_template_id)
+        liability_template.is_deleted = True
+        uow.liability_template_repo.add(liability_template)
         await uow.commit()

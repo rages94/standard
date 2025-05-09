@@ -83,8 +83,9 @@ async def delete_standard(
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> None:
     async with uow:
-        await uow.standard_repo.get_one(
+        standard = await uow.standard_repo.get_one(
             {"id": standard_id}
         )
-        await uow.standard_repo.delete(standard_id)
+        standard.is_deleted = True
+        uow.standard_repo.add(standard)
         await uow.commit()
