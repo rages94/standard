@@ -35,4 +35,4 @@ class LiabilityPublic(SQLModel):
     id: UUID
     count: int
     created_at: datetime
-    liability_template: LiabilityTemplatePublic
+    liability_template: LiabilityTemplatePublic | None = None

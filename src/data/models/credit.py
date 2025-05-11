@@ -15,5 +15,17 @@ class Credit(SQLModel, table=True):
     user_id: UUID = Field(foreign_key="user.id")
     created_at: datetime = Field(default_factory=datetime.now)
     deadline_date: date = Field(default_factory=datetime.now)
+    completed_at: datetime | None = Field(None)
+    completed: bool | None = Field(None)
 
     user: "User" = Relationship(back_populates="credits")
+
+
+class CreditPublic(SQLModel):
+    id: UUID
+    count: int
+    completed_count: int
+    created_at: datetime
+    deadline_date: date
+    completed_at: datetime | None
+    completed: bool | None

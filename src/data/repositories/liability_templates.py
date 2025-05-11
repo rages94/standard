@@ -9,6 +9,7 @@ from src.data.models import LiabilityTemplate
 class LiabilityTemplateFilterSet(BaseFilterSet):
     id = Filter(LiabilityTemplate.id)
     user_id = Filter(LiabilityTemplate.user_id)
+    is_deleted = Filter(LiabilityTemplate.is_deleted)
     pagination = LimitOffsetFilter()
     order = OrderingFilter(
         created_at=OrderingField(LiabilityTemplate.created_at),
@@ -23,4 +24,4 @@ class LiabilityTemplateRepository(
 ):
     model = LiabilityTemplate
     filter_set = LiabilityTemplateFilterSet
-    query = select(LiabilityTemplate)
+    query = select(LiabilityTemplate).where(LiabilityTemplate.is_deleted == False)

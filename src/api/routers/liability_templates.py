@@ -46,7 +46,7 @@ async def list_liability_templates(
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> list[LiabilityTemplate]:
     async with uow:
-        return await uow.liability_template_repo.filter({"user_id": credentials["id"]})
+        return await uow.liability_template_repo.filter(dict(user_id=credentials["id"]))
 
 
 @liability_template_router.patch(

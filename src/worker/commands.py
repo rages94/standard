@@ -16,10 +16,15 @@ def create_credits() -> None:
             await uow.commit()
     asyncio.run(wrapper())
 
-
+# TODO CRON
 @app.command()
-def _() -> None:
-    pass
+def mark_uncompleted_credits() -> None:
+    async def wrapper():
+        uow = container.repositories.uow()
+        async with uow:
+            await uow.credit_repo.mark_uncompleted()
+            await uow.commit()
+    asyncio.run(wrapper())
 
 
 if __name__ == "__main__":
