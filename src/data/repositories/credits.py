@@ -1,5 +1,5 @@
 import operator as op
-from datetime import datetime
+from datetime import datetime, timedelta
 from uuid import UUID
 
 from dateutil.relativedelta import relativedelta
@@ -70,7 +70,7 @@ class CreditRepository(
             count=total_liabilities//count_credit_months,
             user_id=user_id,
             completed_count=0,
-            deadline_date=now.date() + relativedelta(months=1),
+            deadline_date=now.date() + relativedelta(months=1) - timedelta(days=1),
         )
         self.session.add(credit)
         await self.session.flush()
