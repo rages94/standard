@@ -9,4 +9,4 @@ class GatewaysContainer(containers.DeclarativeContainer):
     config = providers.Configuration()
     db = providers.Singleton(Database, dsn=config.database.dsn, echo=config.database.echo)
     ner_model = providers.Singleton(spacy.load, name=config.ner_model.path)
-    classifier_model = providers.Singleton(joblib.load, name=config.classifier_model.path)
+    classifier_model = providers.Singleton(joblib.load, config.classifier_model.path)

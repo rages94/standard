@@ -10,6 +10,7 @@ from src.domain.user.dto.enums import CompletedType
 # mapping_classifier = {
 #     TextClass.completed_standards: container.use_cases.create_completed_standards_from_text(),
 # }
+create_completed_standards_from_text = container.use_cases.create_completed_standards_from_text()
 
 async def conversation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     # TODO authorization
@@ -19,14 +20,14 @@ async def conversation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     user_id = 'a89b9123-436e-456e-956e-dbeff62e18d9'  # TODO
     completed_type = CompletedType.count  # TODO
-    classification_model = container.gateways.classification_model()
-    predictions = classification_model.predict([input_message])
-    if predictions[1] == TextClass.completed_standards:
-        created_standards = container.use_cases.create_completed_standards_from_text(
+    classifier_model = container.gateways.classifier_model()
+    predictions = classifier_model.predict([input_message])
+    if predictions[0] == TextClass.completed_standards.value:
+        created_standards = await create_completed_standards_from_text(
             input_message, user_id, completed_type
         )
         result = (
-            ("Записываю: " + "\n".join((f"{k}: {v}" for k, v in created_standards)))
+            ("Записываю:\n" + "\n".join((f"{k}: {v}" for k, v in created_standards.items())))
             if created_standards
             else "Нифига не понял"
         )

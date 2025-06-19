@@ -29,6 +29,7 @@ pymorphy3 = "^2.0.4"
 python-telegram-bot = "^22.1"
 spacy = "^3.8.7"
 joblib = "^1.5.1"
+scikit-learn = "^1.7.0"
 
 
 [tool.poetry.group.dev.dependencies]
