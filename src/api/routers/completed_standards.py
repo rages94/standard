@@ -33,7 +33,7 @@ async def create_completed_standard(
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> CompletedStandard:
     user_id = credentials["id"]
-    async with uow:
+    async with uow:  # TODO use_case
         standard = await uow.standard_repo.get_one(dict(id=body.standard_id))
         standard_count = body.count if not body.completed_type_is_count() else body.count // standard.count
         count = body.count if body.completed_type_is_count() else body.count * standard.count

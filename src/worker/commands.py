@@ -6,23 +6,8 @@ sys.path.append(
 
 import asyncio
 
-import pymorphy3
-
 from src.containers.container import container
 from src.worker.app import app
-
-
-morph = pymorphy3.MorphAnalyzer()
-
-def normalize_phrase(phrase: str) -> str:
-    words = phrase.lower().split()
-    normalized_words = []
-
-    for word in words:
-        norm = morph.parse(word)[0].normal_form
-        normalized_words.append(norm)
-
-    return " ".join(normalized_words)
 
 
 @app.command()
@@ -50,6 +35,7 @@ def mark_uncompleted_credits() -> None:
 def normalize_completed_standard() -> None:
     async def wrapper():
         uow = container.repositories.uow()
+        normalize_phrase = container.use_cases.normalize_phrase()
         async with uow:
             standards = await uow.standard_repo.filter(dict())
             for standard in standards:

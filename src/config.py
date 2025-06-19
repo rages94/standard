@@ -1,6 +1,10 @@
+import os
+
 from pydantic import field_validator, PostgresDsn
 from pydantic_core.core_schema import ValidationInfo
 from pydantic_settings import BaseSettings
+
+project_dir: str = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 class JwtConfig(BaseSettings):
@@ -37,9 +41,24 @@ class PostgresConfig(BaseSettings):
         )
 
 
+class TelegramSettings(BaseSettings):
+    token: str = ""
+
+
+class ClassifierModelSettings(BaseSettings):
+    path: str = os.path.join(project_dir, 'models/text_classifier.joblib')
+
+
+class NERModelSettings(BaseSettings):
+    path: str = os.path.join(project_dir, 'models/ner_model')
+
+
 class Settings(BaseSettings):
     jwt: JwtConfig = JwtConfig(_env_prefix="jwt_")
     database: PostgresConfig = PostgresConfig(_env_prefix="postgres_")
+    telegram: TelegramSettings = TelegramSettings(_env_prefix="telegram_")
+    classifier_model: ClassifierModelSettings = ClassifierModelSettings(_env_prefix="classifier_model_")
+    ner_model: NERModelSettings = NERModelSettings(_env_prefix="ner_model_")
 
     class Config:
         env_file = ".env"
