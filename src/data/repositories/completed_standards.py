@@ -13,7 +13,7 @@ from src.domain.completed_standards.dto.output import (
     GroupedCompletedStandard,
     Dataset,
     RatingGroupedCompletedStandard,
-    UserCompletedStandard,
+    UserCompletedStandard, HeatmapRow,
 )
 
 
@@ -88,4 +88,27 @@ class CompletedStandardRepository(
         return [
             RatingGroupedCompletedStandard(standard_name=standard_name, user_ratings=ratings)
             for standard_name, ratings in data.items()
+        ]
+
+    async def heatmap_day_week(self, user_id: UUID) -> list[HeatmapRow]:
+        query = (
+            select(
+                func.extract("week", CompletedStandard.created_at).label("week"),
+                func.extract("isodow", CompletedStandard.created_at).label("weekday"),
+                func.sum(CompletedStandard.count / Standard.count).label("count")
+            )
+            .join(Standard, CompletedStandard.standard_id == Standard.id)
+            .where(CompletedStandard.user_id == user_id)
+            .group_by("week", "weekday")
+            .order_by("week", "weekday")
+        )
+        print(query)
+        results = (await self.session.execute(query)).all()
+        return [
+            HeatmapRow(
+                week=int(row.week),
+                weekday=int(row.weekday),
+                count=float(row.count)
+            )
+            for row in results
         ]

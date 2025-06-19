@@ -13,7 +13,7 @@ from src.data.uow import UnitOfWork
 from src.domain.completed_standards.dto.output import (
     GroupedCompletedStandard,
     RatingGroupedCompletedStandard,
-    CompletedStandardListResponse,
+    CompletedStandardListResponse, HeatmapRow,
 )
 
 settings = Settings()
@@ -155,3 +155,17 @@ async def delete_completed_standard(
         await uow.user_repo.update_total_liabilities(user_id)  # TODO events
         # TODO update credit
         await uow.commit()
+
+
+@completed_standard_router.get(
+    "/grouped/heatmap/",
+    responses={200: {"model": list[HeatmapRow]}},
+)
+@inject
+async def heatmap_day_week_completed_standards(
+    uow: UnitOfWork = Depends(Provide["repositories.uow"]),
+    # credentials: JwtAuthorizationCredentials = Security(access_bearer),
+) -> list[HeatmapRow]:
+    async with uow:
+        # return await uow.completed_standard_repo.heatmap_day_week(UUID(credentials["id"]))
+        return await uow.completed_standard_repo.heatmap_day_week(UUID('03b58759-7573-4d12-8457-229ec6db2aa5'))

@@ -29,3 +29,9 @@ class CompletedStandardListResponse(BaseModel):
     data: list[CompletedStandardPublic]
     count: int
     next_page: bool
+
+
+class HeatmapRow(BaseModel):
+    week: int
+    weekday: int
+    count: float
