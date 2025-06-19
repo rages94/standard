@@ -338,6 +338,17 @@ test = ["certifi (>=2024)", "cryptography-vectors (==44.0.0)", "pretend (>=0.7)"
 test-randomorder = ["pytest-randomly"]
 
 [[package]]
+name = "dawg2-python"
+version = "0.9.0"
+description = "Pure-python reader for DAWGs (DAFSAs) created by dawgdic C++ library or DAWG Python extension."
+optional = false
+python-versions = "<4.0,>=3.8"
+files = [
+    {file = "dawg2_python-0.9.0-py3-none-any.whl", hash = "sha256:4fab6fc097bd176cd783cd8421b757348ea5a460789e53b0f6bb64831380bab5"},
+    {file = "dawg2_python-0.9.0.tar.gz", hash = "sha256:adea0312acd1a958659e8448ce6899046c0858d0b6c8949a51eebdeb5a113e4a"},
+]
+
+[[package]]
 name = "dependency-injector"
 version = "4.44.0"
 description = "Dependency injection framework for Python"
@@ -1020,6 +1031,37 @@ files = [
 windows-terminal = ["colorama (>=0.4.6)"]
 
 [[package]]
+name = "pymorphy3"
+version = "2.0.4"
+description = "Morphological analyzer (POS tagger + inflection engine) for Russian language."
+optional = false
+python-versions = "*"
+files = [
+    {file = "pymorphy3-2.0.4-py3-none-any.whl", hash = "sha256:bcda81d242b1217d625357724f144836f4da8fbcde8c760a170854463c1925ee"},
+    {file = "pymorphy3-2.0.4.tar.gz", hash = "sha256:31d7d6949d59424767caf82729cd8f231fbe9df2465c66465191b9c48deca790"},
+]
+
+[package.dependencies]
+dawg2-python = ">=0.8.0"
+pymorphy3-dicts-ru = "*"
+setuptools = {version = ">=68.2.2", markers = "python_version >= \"3.12\""}
+
+[package.extras]
+cli = ["click"]
+fast = ["DAWG2 (>=0.9.0,<1.0.0)"]
+
+[[package]]
+name = "pymorphy3-dicts-ru"
+version = "2.4.417150.4580142"
+description = "Russian dictionaries for pymorphy2"
+optional = false
+python-versions = "*"
+files = [
+    {file = "pymorphy3-dicts-ru-2.4.417150.4580142.tar.gz", hash = "sha256:39ab379d4ca905bafed50f5afc3a3de6f9643605776fbcabc4d3088d4ed382b0"},
+    {file = "pymorphy3_dicts_ru-2.4.417150.4580142-py2.py3-none-any.whl", hash = "sha256:718bac64c73c10c16073a199402657283d9b64c04188b694f6d3e9b0d85440f4"},
+]
+
+[[package]]
 name = "python-dateutil"
 version = "2.9.0.post0"
 description = "Extensions to the standard Python datetime module"
@@ -1091,6 +1133,26 @@ files = [
     {file = "ruff-0.11.5-py3-none-win_arm64.whl", hash = "sha256:67e241b4314f4eacf14a601d586026a962f4002a475aa702c69980a38087aa4e"},
     {file = "ruff-0.11.5.tar.gz", hash = "sha256:cae2e2439cb88853e421901ec040a758960b576126dab520fa08e9de431d1bef"},
 ]
+
+[[package]]
+name = "setuptools"
+version = "80.9.0"
+description = "Easily download, build, install, upgrade, and uninstall Python packages"
+optional = false
+python-versions = ">=3.9"
+files = [
+    {file = "setuptools-80.9.0-py3-none-any.whl", hash = "sha256:062d34222ad13e0cc312a4c02d73f059e86a4acbfbdea8f8f76b28c99f306922"},
+    {file = "setuptools-80.9.0.tar.gz", hash = "sha256:f36b47402ecde768dbfafc46e8e4207b4360c654f1f3bb84475f0a28628fb19c"},
+]
+
+[package.extras]
+check = ["pytest-checkdocs (>=2.4)", "pytest-ruff (>=0.2.1)", "ruff (>=0.8.0)"]
+core = ["importlib_metadata (>=6)", "jaraco.functools (>=4)", "jaraco.text (>=3.7)", "more_itertools", "more_itertools (>=8.8)", "packaging (>=24.2)", "platformdirs (>=4.2.2)", "tomli (>=2.0.1)", "wheel (>=0.43.0)"]
+cover = ["pytest-cov"]
+doc = ["furo", "jaraco.packaging (>=9.3)", "jaraco.tidelift (>=1.4)", "pygments-github-lexers (==0.0.5)", "pyproject-hooks (!=1.1)", "rst.linker (>=1.9)", "sphinx (>=3.5)", "sphinx-favicon", "sphinx-inline-tabs", "sphinx-lint", "sphinx-notfound-page (>=1,<2)", "sphinx-reredirects", "sphinxcontrib-towncrier", "towncrier (<24.7)"]
+enabler = ["pytest-enabler (>=2.2)"]
+test = ["build[virtualenv] (>=1.0.3)", "filelock (>=3.4.0)", "ini2toml[lite] (>=0.14)", "jaraco.develop (>=7.21)", "jaraco.envs (>=2.2)", "jaraco.path (>=3.7.2)", "jaraco.test (>=5.5)", "packaging (>=24.2)", "pip (>=19.1)", "pyproject-hooks (!=1.1)", "pytest (>=6,!=8.1.*)", "pytest-home (>=0.5)", "pytest-perf", "pytest-subprocess", "pytest-timeout", "pytest-xdist (>=3)", "tomli-w (>=1.0.0)", "virtualenv (>=13.0.0)", "wheel (>=0.44.0)"]
+type = ["importlib_metadata (>=7.0.2)", "jaraco.develop (>=7.21)", "mypy (==1.14.*)", "pytest-mypy"]
 
 [[package]]
 name = "shellingham"
@@ -1314,5 +1376,5 @@ standard = ["colorama (>=0.4)", "httptools (>=0.6.3)", "python-dotenv (>=0.13)",
 
 [metadata]
 lock-version = "2.0"
-python-versions = "^3.12"
-content-hash = "b7f5b891681c79583c9682fe3c36b2cd06948071cb68a548c061d5c5bfa6eea8"
+python-versions = "~3.12.6"
+content-hash = "5d6bc84edbf04b4e1de9c838aa513a37b68aff44861d4361d6d04e824a6d551f"
