@@ -11,6 +11,8 @@ class JwtConfig(BaseSettings):
     secret_key: str = "d2a73573-da3a-44d2-bb4e-5a9dceae01a2"
     refresh_secret_key: str = "68b94237-fd46-4ae7-b71f-afb7b6c5dd82"
 
+class BotAuthConfig(BaseSettings):
+    url: str = "http://127.0.0.1:8000/auth/"
 
 class PostgresConfig(BaseSettings):
     scheme: str = "postgresql+asyncpg"
@@ -55,6 +57,7 @@ class NERModelSettings(BaseSettings):
 
 class Settings(BaseSettings):
     jwt: JwtConfig = JwtConfig(_env_prefix="jwt_")
+    bot_auth: BotAuthConfig = BotAuthConfig(_env_prefix="bot_auth_")
     database: PostgresConfig = PostgresConfig(_env_prefix="postgres_")
     telegram: TelegramSettings = TelegramSettings(_env_prefix="telegram_")
     classifier_model: ClassifierModelSettings = ClassifierModelSettings(_env_prefix="classifier_model_")

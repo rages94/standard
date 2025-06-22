@@ -1,10 +1,13 @@
 from dependency_injector import containers, providers
 
+from src.domain.auth_link.use_cases.create import CreateAuthLink
+from src.domain.bot.use_cases.send_message import BotSendMessage
 from src.domain.classifier.use_cases.classify import Classify
 from src.domain.completed_standards.use_cases.create import CreateCompletedStandard
 from src.domain.completed_standards.use_cases.create_from_text import CreateCompletedStandardsFromText
 from src.domain.ner.use_cases.normalize_phrase import NormalizePhrase
 from src.domain.ner.use_cases.parse_standards import ParseStandards
+from src.domain.user.use_cases.check_auth_chat import AuthChatManager
 
 
 class UseCasesContainer(containers.DeclarativeContainer):
@@ -29,3 +32,7 @@ class UseCasesContainer(containers.DeclarativeContainer):
         parse_standards=parse_standards,
         create_completed_standards=create_completed_standards,
     )
+
+    auth_chat_manager = providers.Singleton(AuthChatManager, uow=repositories.uow)
+    create_auth_link = providers.Factory(CreateAuthLink, uow=repositories.uow)
+    bot_send_message = providers.Factory(BotSendMessage, telegram_client=gateways.telegram_client)

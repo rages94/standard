@@ -13,6 +13,7 @@ from src.domain.jwt.dto.output import JwtResponse
 from src.domain.user.dto.filters import UserFilterSchema
 from src.domain.auth_link.dto.filters import AuthLinkFilterSchema
 from src.domain.auth_link.dto.output import AuthOutput
+from src.domain.bot.use_cases.send_message import BotSendMessage
 
 settings = Settings()
 user_router = APIRouter()
@@ -57,7 +58,8 @@ async def login(
 @inject
 async def bot_login(
     body: UserBotLogin,
-    uow: UnitOfWork = Depends(Provide["repositories.uow"])
+    uow: UnitOfWork = Depends(Provide["repositories.uow"]),
+    bot_send_message: BotSendMessage = Depends(Provide["use_cases.bot_send_message"]),
 ) -> AuthOutput:
     async with uow:
         existing_auth_link = await uow.auth_link_repo.filter(
@@ -75,9 +77,11 @@ async def bot_login(
         if not existing_user[0].check_password(body.password):
             raise HTTPException(status_code=401, detail="Неверный никнейм или пароль!")
 
-        await uow.user_repo.update(dict(id=existing_user[0].id, telegram_chat_id=body.telegram_chat_id))
+        await uow.user_repo.update(dict(id=existing_user[0].id, telegram_chat_id=body.chat_id))
         await uow.auth_link_repo.update(dict(id=existing_auth_link[0].id, user_id=existing_user[0].id))
         await uow.commit()
+
+        await bot_send_message("Авторизация прошла успешно", body.chat_id)
         return AuthOutput(status='ok')
 
 

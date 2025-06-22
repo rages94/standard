@@ -13,6 +13,7 @@ from src.data.models import User, Liability, CompletedStandard
 class UserFilterSet(BaseFilterSet):
     id = Filter(User.id)
     username = Filter(User.username)
+    chat_id = Filter(User.telegram_chat_id)
     pagination = LimitOffsetFilter()
     order = OrderingFilter(
         created_at=OrderingField(User.created_at),

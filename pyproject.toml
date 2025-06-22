@@ -30,6 +30,7 @@ python-telegram-bot = "^22.1"
 spacy = "^3.8.7"
 joblib = "^1.5.1"
 scikit-learn = "^1.7.0"
+telegramify-markdown = "^0.5.1"
 
 
 [tool.poetry.group.dev.dependencies]

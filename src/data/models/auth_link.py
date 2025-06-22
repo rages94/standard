@@ -14,7 +14,7 @@ def get_expire_date(hours=1):
 
 class AuthLink(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    user_id: UUID = Field(foreign_key="user.id")
+    user_id: UUID | None = Field(foreign_key="user.id", nullable=True)
     created_at: datetime = Field(default_factory=datetime.now)
     expire_datetime: datetime = Field(default_factory=get_expire_date, index=True)
 
