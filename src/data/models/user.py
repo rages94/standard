@@ -19,7 +19,8 @@ class User(SQLModel, table=True):
     email: str | None = Field(unique=True, index=True)
     hashed_password: str
     created_at: datetime = Field(default_factory=datetime.now)
-    total_liabilities: int = Field(default=0, nullable=True)
+    total_liabilities: int | None = Field(default=0, nullable=True)
+    telegram_chat_id: int | None = Field(nullable=True, index=True)
     completed_type: str = Field(CompletedType.count.value, nullable=True)
 
     completed_standards: list["CompletedStandard"] = Relationship(back_populates="user")

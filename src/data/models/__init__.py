@@ -1,3 +1,4 @@
+from .auth_link import AuthLink
 from .user import User
 from .liability_template import LiabilityTemplate
 from .liability import Liability
@@ -12,4 +13,5 @@ __all__ = [
     "Standard",
     "Credit",
     "CompletedStandard",
+    "AuthLink",
 ]

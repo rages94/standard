@@ -1,4 +1,5 @@
 from src.common.uow.uow import BaseUnitOfWork
+from src.data.repositories.auth_link import AuthLinkRepository
 from src.data.repositories.completed_standards import CompletedStandardRepository
 from src.data.repositories.liabilities import LiabilityRepository
 from src.data.repositories.liability_templates import LiabilityTemplateRepository
@@ -16,3 +17,4 @@ class UnitOfWork(BaseUnitOfWork):
         self.completed_standard_repo = CompletedStandardRepository(self.session)
         self.standard_repo = StandardRepository(self.session)
         self.credit_repo = CreditRepository(self.session)
+        self.auth_link_repo = AuthLinkRepository(self.session)
