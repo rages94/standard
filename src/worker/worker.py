@@ -47,7 +47,7 @@ async def conversation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         )
         await update.message.reply_text(result)
     elif predictions[0] == TextClass.liability.value:
-        created_liabilities = await create_liabilities_from_text(
+        created_liabilities = await create_liabilities_from_text(  # TODO training on liabilities, check
             input_message, user.id
         )
         result = (
