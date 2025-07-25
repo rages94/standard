@@ -44,6 +44,18 @@ def normalize_completed_standard() -> None:
             await uow.commit()
     asyncio.run(wrapper())
 
+@app.command()
+def normalize_liability_templates() -> None:
+    async def wrapper():
+        uow = container.repositories.uow()
+        normalize_phrase = container.use_cases.normalize_phrase()
+        async with uow:
+            liability_templates = await uow.liability_template_repo.filter(dict())
+            for liability_template in liability_templates:
+                liability_template.normal_form = normalize_phrase(liability_template.name)
+                uow.liability_template_repo.add(liability_template)
+            await uow.commit()
+    asyncio.run(wrapper())
 
 if __name__ == "__main__":
     app()

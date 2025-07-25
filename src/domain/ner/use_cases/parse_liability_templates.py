@@ -26,7 +26,8 @@ class ParseLiabilityTemplates:
                     last_qty = int(ent.text)
                 except ValueError:
                     continue
-            elif ent.label_ == ParamType.liability.value:
+            # elif ent.label_ == ParamType.liability.value:  # TODO fix after training ner
+            elif ent.label_ == ParamType.exercise.value:
                 normalized = self.normalize_phrase(ent.text.lower())
                 if normalized in self.mapping_liability_templates:
                     lt_id = self.mapping_liability_templates[normalized]
