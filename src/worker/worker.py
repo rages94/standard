@@ -1,3 +1,9 @@
+import sys, os
+
+sys.path.append(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
+
 from telegram import Update
 from telegram.constants import ParseMode
 from telegram.ext import Application, MessageHandler, filters, ContextTypes
