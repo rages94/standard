@@ -1,5 +1,9 @@
 import sys, os
 
+from src.api.routers.liabilities import list_liabilities
+from src.data.models.credit import CreditPublic
+from src.data.models.liability import LiabilityPublic
+
 sys.path.append(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
@@ -25,16 +29,21 @@ get_rating_from_text = container.use_cases.get_rating_from_text()
 auth_chat_manager = container.use_cases.auth_chat_manager()
 create_auth_link = container.use_cases.create_auth_link()
 list_completed_standards_from_text = container.use_cases.list_completed_standards_from_text()
+list_liabilities_from_text = container.use_cases.list_liabilities_from_text()
+list_credits_from_text = container.use_cases.list_credits_from_text()
 get_user = container.use_cases.get_user()
 classifier_model = container.gateways.classifier_model()
 
 async def conversation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not update.message:
+        return
+
     user: User = await auth_chat_manager.get_auth_user(update.message.chat.id)
     if not user:
         await handle_login(update, user)
         return
 
-    # TODO training ner model + распознавать текстовые числа
+    # TODO training ner model + распознавать текстовые числа + день/неделя/месяц
     predictions = classifier_model.predict([update.message.text])
     # TODO mapping
     if predictions[0] == TextClass.completed_standards.value:
@@ -43,8 +52,14 @@ async def conversation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         await handle_liability(update, user)
     elif predictions[0] == TextClass.rating.value:
         await handle_rating(update, user)
-    elif predictions[0] == TextClass.history.value:
-        await handle_history(update, user)
+    elif predictions[0] == TextClass.standard_history.value:
+        await handle_standard_history(update, user)
+    elif predictions[0] == TextClass.liability_history.value:
+        await handle_liability_history(update, user)
+    elif predictions[0] == TextClass.credit_history.value:
+        await handle_credit_history(update, user)
+    elif predictions[0] == TextClass.total_liabilities.value:
+        await handle_total_liabilities(update, user)
     elif predictions[0] == TextClass.other.value:
         await handle_other(update, user)
 
@@ -113,7 +128,7 @@ async def handle_rating(update: Update, user: User) -> None:
         parse_mode=ParseMode.MARKDOWN_V2
     )
 
-async def handle_history(update: Update, user: User) -> None:
+async def handle_standard_history(update: Update, user: User) -> None:
     result = "`История списаний`:\n\n"
     input_message = update.message.text
     completed_standards: list[CompletedStandardPublic] = await list_completed_standards_from_text(
@@ -126,6 +141,48 @@ async def handle_history(update: Update, user: User) -> None:
         telegramify_markdown.markdownify(result),
         parse_mode=ParseMode.MARKDOWN_V2
     )
+
+async def handle_liability_history(update: Update, user: User) -> None:
+    result = "`История долгов`:\n\n"
+    input_message = update.message.text
+    liabilities: list[LiabilityPublic] = await list_liabilities_from_text(
+        input_message,
+        user.id,
+    )
+    for i, liability in enumerate(liabilities):
+        result += f"{i + 1}) {liability.liability_template.name}: {liability.count}\n"
+    await update.message.reply_text(
+        telegramify_markdown.markdownify(result),
+        parse_mode=ParseMode.MARKDOWN_V2
+    )
+
+async def handle_credit_history(update: Update, user: User) -> None:
+    status_mapping = {None: "в процессе", False: "завален", True: "выполнен"}
+    result = "`История зачетов`:\n\n"
+    input_message = update.message.text
+    credits: list[CreditPublic] = await list_credits_from_text(
+        input_message,
+        user.id,
+    )
+    for i, credit in enumerate(credits):
+
+        result += (
+            f"{i + 1}) {credit.completed_count}/{credit.count} н. "
+            f"c {credit.created_at.strftime("%d.%m.%Y")} по {credit.deadline_date.strftime("%d.%m.%Y")} "
+            f"({status_mapping[credit.completed]})\n"
+        )
+    await update.message.reply_text(
+        telegramify_markdown.markdownify(result),
+        parse_mode=ParseMode.MARKDOWN_V2
+    )
+
+async def handle_total_liabilities(update: Update, user: User) -> None:
+    result = f'**Долг**: {user.total_liabilities} н.'
+    await update.message.reply_text(
+        telegramify_markdown.markdownify(result),
+        parse_mode=ParseMode.MARKDOWN_V2
+    )
+
 
 async def handle_other(update: Update, user: User) -> None:
     result = "Хоп-хей"

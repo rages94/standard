@@ -14,6 +14,7 @@ class JwtConfig(BaseSettings):
 class BotAuthConfig(BaseSettings):
     url: str = "http://127.0.0.1:8000/auth/"
 
+
 class PostgresConfig(BaseSettings):
     scheme: str = "postgresql+asyncpg"
     host: str = "localhost"
@@ -48,7 +49,7 @@ class TelegramSettings(BaseSettings):
 
 
 class ClassifierModelSettings(BaseSettings):
-    path: str = os.path.join(project_dir, 'models/text_classifier.joblib')
+    path: str = os.path.join(project_dir, 'models/text_classifier5.joblib')
 
 
 class NERModelSettings(BaseSettings):

@@ -7,8 +7,12 @@ from src.domain.completed_standards.use_cases.create import CreateCompletedStand
 from src.domain.completed_standards.use_cases.create_from_text import CreateCompletedStandardsFromText
 from src.domain.completed_standards.use_cases.list import ListCompletedStandards
 from src.domain.completed_standards.use_cases.list_from_text import ListCompletedStandardsFromText
+from src.domain.credits.use_cases.list_from_text import ListCreditsFromText
+from src.domain.credits.use_cases.list import ListCredits
 from src.domain.liabilities.use_cases.create import CreateLiability
 from src.domain.liabilities.use_cases.create_from_text import CreateLiabilitiesFromText
+from src.domain.liabilities.use_cases.list import ListLiabilities
+from src.domain.liabilities.use_cases.list_from_text import ListLiabilitiesFromText
 from src.domain.ner.use_cases.normalize_phrase import NormalizePhrase
 from src.domain.ner.use_cases.parse_standards import ParseStandards
 from src.domain.ner.use_cases.parse_liability_templates import ParseLiabilityTemplates
@@ -61,6 +65,20 @@ class UseCasesContainer(containers.DeclarativeContainer):
         ListCompletedStandardsFromText,
         get_count_from_text=get_count_from_text,
         list_completed_standards=list_completed_standards,
+    )
+
+    list_liabilities = providers.Factory(ListLiabilities, uow=repositories.uow)
+    list_liabilities_from_text = providers.Factory(
+        ListLiabilitiesFromText,
+        get_count_from_text=get_count_from_text,
+        list_liabilities=list_liabilities,
+    )
+
+    list_credits = providers.Factory(ListCredits, uow=repositories.uow)
+    list_credits_from_text = providers.Factory(
+        ListCreditsFromText,
+        get_count_from_text=get_count_from_text,
+        list_credits=list_credits,
     )
 
     auth_chat_manager = providers.Singleton(AuthChatManager, uow=repositories.uow)
