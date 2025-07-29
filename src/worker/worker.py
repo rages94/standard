@@ -1,9 +1,5 @@
 import sys, os
 
-from src.api.routers.liabilities import list_liabilities
-from src.data.models.credit import CreditPublic
-from src.data.models.liability import LiabilityPublic
-
 sys.path.append(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 )
@@ -16,6 +12,8 @@ import telegramify_markdown
 from src.containers.container import container
 from src.data.models import User
 from src.data.models.completed_standard import CompletedStandardPublic
+from src.data.models.credit import CreditPublic
+from src.data.models.liability import LiabilityPublic
 from src.domain.classifier.dto.enums import TextClass
 from src.domain.completed_standards.dto.output import RatingGroupedCompletedStandard
 
