@@ -1,4 +1,5 @@
-import sys, os
+import sys
+import os
 
 sys.path.append(
     os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -16,6 +17,7 @@ from src.data.models.credit import CreditPublic
 from src.data.models.liability import LiabilityPublic
 from src.domain.classifier.dto.enums import TextClass
 from src.domain.completed_standards.dto.output import RatingGroupedCompletedStandard
+
 
 # mapping_classifier = {
 #     TextClass.completed_standards: container.use_cases.create_completed_standards_from_text(),
@@ -76,7 +78,7 @@ async def handle_login(update: Update, user: User) -> None:
 
 async def handle_liability(update: Update, user: User) -> None:
     input_message = update.message.text
-    created_liabilities = await create_liabilities_from_text(  # TODO training on liabilities, check
+    created_liabilities = await create_liabilities_from_text(
         input_message, user.id
     )
     user: User = await get_user(user.id)
