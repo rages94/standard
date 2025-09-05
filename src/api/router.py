@@ -2,6 +2,7 @@ from fastapi import APIRouter
 
 from src.api.routers.completed_standards import completed_standard_router
 from src.api.routers.credits import credit_router
+from src.api.routers.health import health_router
 from src.api.routers.liabilities import liability_router
 from src.api.routers.liability_templates import liability_template_router
 from src.api.routers.standards import standard_router
@@ -18,4 +19,5 @@ def include_routers() -> APIRouter:
     main_router.include_router(completed_standard_router, prefix='/completed_standards', tags=['Completed standards'])
     main_router.include_router(standard_router, prefix='/standards', tags=['Standards'])
     main_router.include_router(credit_router, prefix='/credits', tags=['Credits'])
+    main_router.include_router(health_router, prefix='/health', tags=['Health'])
     return main_router

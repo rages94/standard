@@ -10,8 +10,9 @@ FROM python:3.12-slim
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1
 WORKDIR /app
+RUN apt-get update && apt-get install curl -y
 COPY --from=builder /wheels /wheels
 COPY --from=builder /install/requirements.txt .
 RUN pip install --no-deps --no-index --find-links=/wheels -r requirements.txt
 COPY . .
-CMD ["uvicorn", "src.api.main:app"]
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0"]
