@@ -3,6 +3,7 @@ from src.data.repositories.auth_link import AuthLinkRepository
 from src.data.repositories.completed_standards import CompletedStandardRepository
 from src.data.repositories.liabilities import LiabilityRepository
 from src.data.repositories.liability_templates import LiabilityTemplateRepository
+from src.data.repositories.message import MessageRepository
 from src.data.repositories.standards import StandardRepository
 from src.data.repositories.users import UserRepository
 from src.data.repositories.credits import CreditRepository
@@ -18,3 +19,4 @@ class UnitOfWork(BaseUnitOfWork):
         self.standard_repo = StandardRepository(self.session)
         self.credit_repo = CreditRepository(self.session)
         self.auth_link_repo = AuthLinkRepository(self.session)
+        self.message_repo = MessageRepository(self.session)

@@ -5,6 +5,7 @@ from .liability import Liability
 from .standard import Standard
 from .credit import Credit
 from .completed_standard import CompletedStandard
+from .message import Message
 
 __all__ = [
     "User",
@@ -14,4 +15,5 @@ __all__ = [
     "Credit",
     "CompletedStandard",
     "AuthLink",
+    "Message",
 ]

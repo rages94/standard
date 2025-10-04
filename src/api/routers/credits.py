@@ -26,7 +26,7 @@ async def get_credit(
 ) -> Credit:
     user_id = credentials["id"]
     async with uow:
-        return await uow.credit_repo.get_one(dict(user_id=user_id, deadline_date_ge=datetime.now()))
+        return await uow.credit_repo.get_one(dict(user_id=user_id, deadline_date_ge=datetime.now().date()))  # TODO timezone
 
 
 @credit_router.get(

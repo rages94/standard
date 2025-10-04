@@ -8,7 +8,7 @@ from passlib.context import CryptContext
 from src.domain.user.dto.enums import CompletedType
 
 if TYPE_CHECKING:
-    from src.data.models import AuthLink, CompletedStandard, Liability, LiabilityTemplate, Credit
+    from src.data.models import AuthLink, CompletedStandard, Liability, LiabilityTemplate, Credit, Message
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -25,6 +25,7 @@ class User(SQLModel, table=True):
 
     completed_standards: list["CompletedStandard"] = Relationship(back_populates="user")
     liabilities: list["Liability"] = Relationship(back_populates="user")
+    messages: list["Message"] = Relationship(back_populates="user")
     credits: list["Credit"] = Relationship(back_populates="user")
     liability_templates: list["LiabilityTemplate"] = Relationship(back_populates="user")
     auth_links: list["AuthLink"] = Relationship(back_populates="user")

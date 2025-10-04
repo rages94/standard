@@ -15,6 +15,7 @@ from src.data.models import User
 from src.data.models.completed_standard import CompletedStandardPublic
 from src.data.models.credit import CreditPublic
 from src.data.models.liability import LiabilityPublic
+from src.data.models.message import MessageCreate
 from src.domain.classifier.dto.enums import TextClass
 from src.domain.completed_standards.dto.output import RatingGroupedCompletedStandard
 
@@ -32,51 +33,71 @@ list_completed_standards_from_text = container.use_cases.list_completed_standard
 list_liabilities_from_text = container.use_cases.list_liabilities_from_text()
 list_credits_from_text = container.use_cases.list_credits_from_text()
 get_user = container.use_cases.get_user()
+create_message = container.use_cases.create_message()
 classifier_model = container.gateways.classifier_model()
 
 async def conversation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not update.message:
         return
 
-    user: User = await auth_chat_manager.get_auth_user(update.message.chat.id)
+    chat_id = update.message.chat_id
+    text_message = update.message.text
+    user: User = await auth_chat_manager.get_auth_user(chat_id)
     if not user:
+        await create_message(MessageCreate(text=text_message, chat_id=chat_id))
         await handle_login(update, user)
         return
 
+    await create_message(MessageCreate(text=text_message, chat_id=chat_id, user_id=user.id))
     # TODO training ner model + распознавать текстовые числа + день/неделя/месяц
-    predictions = classifier_model.predict([update.message.text])
+    predictions = classifier_model.predict([text_message])
     # TODO mapping
+    response = None
     if predictions[0] == TextClass.completed_standards.value:
-        await handle_standard(update, user)
+        response = await handle_standard(update, user)
     elif predictions[0] == TextClass.liability.value:
-        await handle_liability(update, user)
+        response = await handle_liability(update, user)
     elif predictions[0] == TextClass.rating.value:
-        await handle_rating(update, user)
+        response = await handle_rating(update, user)
     elif predictions[0] == TextClass.standard_history.value:
-        await handle_standard_history(update, user)
+        response = await handle_standard_history(update, user)
     elif predictions[0] == TextClass.liability_history.value:
-        await handle_liability_history(update, user)
+        response = await handle_liability_history(update, user)
     elif predictions[0] == TextClass.credit_history.value:
-        await handle_credit_history(update, user)
+        response = await handle_credit_history(update, user)
     elif predictions[0] == TextClass.total_liabilities.value:
-        await handle_total_liabilities(update, user)
+        response = await handle_total_liabilities(update, user)
     elif predictions[0] == TextClass.other.value:
-        await handle_other(update, user)
+        response = await handle_other(update, user)
+
+    if response:
+        await create_message(MessageCreate(text=response, chat_id=chat_id))
 
 
 # TODO handlers to container
-async def handle_login(update: Update, user: User) -> None:
+async def handle_login(update: Update, user: User) -> str:
     # TODO register
     chat_id = update.message.chat.id
     auth_link = await create_auth_link(chat_id)
+    link = f"{config['bot_auth']['url']}?token={auth_link.id}&chat_id={chat_id}"
+    text = (
+        "Q, я нормобот, краткая инструкция по функционалу:\n"
+        "`Списание`: 10 подтягиваний; спиши 40 приседаний; 50 икр и 60 скручиваний\n"
+        "`Запись`: 15 смертей; запиши 21 смерть;\n"
+        "`История списаний`: история; последние 15 списаний; история списаний;\n"
+        "`История долгов`: история долгов; последние 13 долгов; покажи историю долгов\n"
+        "`История зачетов`: зачеты; последние 5 зачетов; история зачетов; покажи историю зачетов;\n"
+        "`Рейтинг`: рейтинг(покажет рейтинг за последний день); покажи рейтинг; рейтинг за 5 дней;\n"
+        "`Долги`: долг; покажи долг;\n\n"
+        f"А теперь [авторизуйся]({link})"
+    )
     await update.message.reply_text(
-        telegramify_markdown.markdownify(
-            f"Ну-ка [авторизуйся]({config['bot_auth']['url']}?token={auth_link.id}&chat_id={chat_id})"
-        ),
+        telegramify_markdown.markdownify(text),
         parse_mode=ParseMode.MARKDOWN_V2
     )
+    return text
 
-async def handle_liability(update: Update, user: User) -> None:
+async def handle_liability(update: Update, user: User) -> str:
     input_message = update.message.text
     created_liabilities = await create_liabilities_from_text(
         input_message, user.id
@@ -92,8 +113,9 @@ async def handle_liability(update: Update, user: User) -> None:
         telegramify_markdown.markdownify(result),
         parse_mode=ParseMode.MARKDOWN_V2
     )
+    return result
 
-async def handle_standard(update: Update, user: User) -> None:
+async def handle_standard(update: Update, user: User) -> str:
     input_message = update.message.text
     created_standards = await create_completed_standards_from_text(
         input_message, user.id, user.completed_type
@@ -109,9 +131,10 @@ async def handle_standard(update: Update, user: User) -> None:
         telegramify_markdown.markdownify(result),
         parse_mode=ParseMode.MARKDOWN_V2
     )
+    return result
 
 
-async def handle_rating(update: Update, user: User) -> None:
+async def handle_rating(update: Update, user: User) -> str:
     result = "`Рейтинг`:\n"
     input_message = update.message.text
     grouped_completed_standards: list[RatingGroupedCompletedStandard] = await get_rating_from_text(
@@ -127,8 +150,9 @@ async def handle_rating(update: Update, user: User) -> None:
         telegramify_markdown.markdownify(result),
         parse_mode=ParseMode.MARKDOWN_V2
     )
+    return result
 
-async def handle_standard_history(update: Update, user: User) -> None:
+async def handle_standard_history(update: Update, user: User) -> str:
     result = "`История списаний`:\n\n"
     input_message = update.message.text
     completed_standards: list[CompletedStandardPublic] = await list_completed_standards_from_text(
@@ -141,8 +165,9 @@ async def handle_standard_history(update: Update, user: User) -> None:
         telegramify_markdown.markdownify(result),
         parse_mode=ParseMode.MARKDOWN_V2
     )
+    return result
 
-async def handle_liability_history(update: Update, user: User) -> None:
+async def handle_liability_history(update: Update, user: User) -> str:
     result = "`История долгов`:\n\n"
     input_message = update.message.text
     liabilities: list[LiabilityPublic] = await list_liabilities_from_text(
@@ -155,8 +180,9 @@ async def handle_liability_history(update: Update, user: User) -> None:
         telegramify_markdown.markdownify(result),
         parse_mode=ParseMode.MARKDOWN_V2
     )
+    return result
 
-async def handle_credit_history(update: Update, user: User) -> None:
+async def handle_credit_history(update: Update, user: User) -> str:
     status_mapping = {None: "в процессе", False: "завален", True: "выполнен"}
     result = "`История зачетов`:\n\n"
     input_message = update.message.text
@@ -175,18 +201,21 @@ async def handle_credit_history(update: Update, user: User) -> None:
         telegramify_markdown.markdownify(result),
         parse_mode=ParseMode.MARKDOWN_V2
     )
+    return result
 
-async def handle_total_liabilities(update: Update, user: User) -> None:
+async def handle_total_liabilities(update: Update, user: User) -> str:
     result = f'**Долг**: {user.total_liabilities} н.'
     await update.message.reply_text(
         telegramify_markdown.markdownify(result),
         parse_mode=ParseMode.MARKDOWN_V2
     )
+    return result
 
 
-async def handle_other(update: Update, user: User) -> None:
+async def handle_other(update: Update, user: User) -> str:
     result = "Хоп-хей"
     await update.message.reply_text(result)
+    return result
 
 
 def main() -> None:

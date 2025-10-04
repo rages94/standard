@@ -13,6 +13,7 @@ from src.domain.liabilities.use_cases.create import CreateLiability
 from src.domain.liabilities.use_cases.create_from_text import CreateLiabilitiesFromText
 from src.domain.liabilities.use_cases.list import ListLiabilities
 from src.domain.liabilities.use_cases.list_from_text import ListLiabilitiesFromText
+from src.domain.messages.use_cases.create import CreateMessage
 from src.domain.ner.use_cases.normalize_phrase import NormalizePhrase
 from src.domain.ner.use_cases.parse_standards import ParseStandards
 from src.domain.ner.use_cases.parse_liability_templates import ParseLiabilityTemplates
@@ -86,3 +87,5 @@ class UseCasesContainer(containers.DeclarativeContainer):
     bot_send_message = providers.Factory(BotSendMessage, telegram_client=gateways.telegram_client)
 
     get_user = providers.Factory(GetUser, uow=repositories.uow)
+
+    create_message = providers.Factory(CreateMessage, uow=repositories.uow)

@@ -36,7 +36,7 @@ class CreditRepository(
     query = select(Credit).order_by(Credit.created_at.desc())
 
     async def update_completed_count(self, user_id: UUID, completed_count: int) -> None:
-        params = dict(user_id=user_id, deadline_date_ge=datetime.now())
+        params = dict(user_id=user_id, deadline_date_ge=datetime.now().date())  # TODO timezone
         credit = await self.get_one(params)
         credit.completed_count += completed_count
         if credit.completed_count >= credit.count and not credit.completed:
@@ -46,7 +46,7 @@ class CreditRepository(
         await self.session.flush()
 
     async def mark_uncompleted(self) -> None:
-        params = dict(deadline_date_lt=datetime.now(), completed=None)
+        params = dict(deadline_date_lt=datetime.now().date(), completed=None)
         query = (
             update(Credit)
             .values({'completed': False})
@@ -57,7 +57,7 @@ class CreditRepository(
 
     # TODO by user settings
     async def create_by_user(self, user_id: UUID, total_liabilities: int) -> None:
-        params = dict(user_id=user_id, deadline_date_ge=datetime.now())
+        params = dict(user_id=user_id, deadline_date_ge=datetime.now().date())
         try:
             await self.get_one(params)
             return
@@ -66,8 +66,9 @@ class CreditRepository(
 
         now = datetime.now()
         count_credit_months = 13 - now.month
+        count_credit = total_liabilities//count_credit_months
         credit = Credit(
-            count=total_liabilities//count_credit_months,
+            count=count_credit if count_credit < 2500 else 2500,
             user_id=user_id,
             completed_count=0,
             deadline_date=now.date() + relativedelta(months=1) - timedelta(days=1),
