@@ -112,6 +112,7 @@ class UseCasesContainer(containers.DeclarativeContainer):
         CreateCompletedStandardHandler,
         create_completed_standards_from_text=create_completed_standards_from_text,
         get_user=get_user,
+        get_active_credit=get_active_credit,
     )
     rating_handler = providers.Factory(
         RatingHandler,
