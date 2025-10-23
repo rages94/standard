@@ -1,6 +1,15 @@
 from dependency_injector import containers, providers
 
 from src.domain.auth_link.use_cases.create import CreateAuthLink
+from src.domain.bot.handlers.credit_history import CreditHistoryHandler
+from src.domain.bot.handlers.create_completed_standard import CreateCompletedStandardHandler
+from src.domain.bot.handlers.create_liability import CreateLiabilityHandler
+from src.domain.bot.handlers.liability_history import LiabilityHistoryHandler
+from src.domain.bot.handlers.login import LoginHandler
+from src.domain.bot.handlers.other import OtherHandler
+from src.domain.bot.handlers.rating import RatingHandler
+from src.domain.bot.handlers.standard_history import StandardHistoryHandler
+from src.domain.bot.handlers.total_liabilities import TotalLiabilitiesHandler
 from src.domain.bot.use_cases.send_message import BotSendMessage
 from src.domain.classifier.use_cases.classify import Classify
 from src.domain.completed_standards.use_cases.create import CreateCompletedStandard
@@ -60,7 +69,7 @@ class UseCasesContainer(containers.DeclarativeContainer):
         parse_standards=parse_standards,
         create_completed_standard=create_completed_standard,
     )
-    get_rating_from_text = providers.Factory(GetRatingFromText, ner_model=gateways.ner_model, uow=repositories.uow)
+    get_rating_from_text = providers.Factory(GetRatingFromText, uow=repositories.uow)
     list_completed_standards = providers.Factory(ListCompletedStandards, uow=repositories.uow)
     list_completed_standards_from_text = providers.Factory(
         ListCompletedStandardsFromText,
@@ -89,3 +98,39 @@ class UseCasesContainer(containers.DeclarativeContainer):
     get_user = providers.Factory(GetUser, uow=repositories.uow)
 
     create_message = providers.Factory(CreateMessage, uow=repositories.uow)
+
+    # telegram handlers
+    login_handler = providers.Factory(LoginHandler, create_auth_link=create_auth_link)
+    create_liability_handler = providers.Factory(
+        CreateLiabilityHandler,
+        create_liabilities_from_text=create_liabilities_from_text,
+        get_user=get_user,
+    )
+    create_completed_standard_handler = providers.Factory(
+        CreateCompletedStandardHandler,
+        create_completed_standards_from_text=create_completed_standards_from_text,
+        get_user=get_user,
+    )
+    rating_handler = providers.Factory(
+        RatingHandler,
+        get_rating_from_text=get_rating_from_text,
+    )
+    standard_history_handler = providers.Factory(
+        StandardHistoryHandler,
+        list_completed_standards_from_text=list_completed_standards_from_text,
+    )
+    liability_history_handler = providers.Factory(
+        LiabilityHistoryHandler,
+        list_liabilities_from_text=list_liabilities_from_text,
+    )
+    credit_history_handler = providers.Factory(
+        CreditHistoryHandler,
+        list_credits_from_text=list_credits_from_text,
+    )
+    total_liabilities_handler = providers.Factory(TotalLiabilitiesHandler)
+    other_handler = providers.Factory(OtherHandler)
+
+
+
+
+

@@ -62,7 +62,7 @@ class TelegramSettings(BaseSettings):
     )
 
 class ClassifierModelSettings(BaseSettings):
-    path: str = os.path.join(project_dir, 'models/text_classifier5.joblib')
+    path: str = os.path.join(project_dir, 'models/text_classifier7.joblib')
 
     model_config = SettingsConfigDict(
         env_file='.env', extra='ignore', env_prefix='classifier_model_'
