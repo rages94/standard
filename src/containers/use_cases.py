@@ -16,6 +16,7 @@ from src.domain.completed_standards.use_cases.create import CreateCompletedStand
 from src.domain.completed_standards.use_cases.create_from_text import CreateCompletedStandardsFromText
 from src.domain.completed_standards.use_cases.list import ListCompletedStandards
 from src.domain.completed_standards.use_cases.list_from_text import ListCompletedStandardsFromText
+from src.domain.credits.use_cases.get_active import GetActiveCredit
 from src.domain.credits.use_cases.list_from_text import ListCreditsFromText
 from src.domain.credits.use_cases.list import ListCredits
 from src.domain.liabilities.use_cases.create import CreateLiability
@@ -84,6 +85,7 @@ class UseCasesContainer(containers.DeclarativeContainer):
         list_liabilities=list_liabilities,
     )
 
+    get_active_credit = providers.Factory(GetActiveCredit, uow=repositories.uow)
     list_credits = providers.Factory(ListCredits, uow=repositories.uow)
     list_credits_from_text = providers.Factory(
         ListCreditsFromText,

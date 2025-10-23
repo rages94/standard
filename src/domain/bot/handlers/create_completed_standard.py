@@ -5,6 +5,7 @@ from telegram.constants import ParseMode
 from src.data.models import User
 from src.domain.bot.interfaces import IHandler
 from src.domain.completed_standards.use_cases.create_from_text import CreateCompletedStandardsFromText
+from src.domain.credits.use_cases.get_active import GetActiveCredit
 from src.domain.user.use_cases.get import GetUser
 
 
@@ -13,9 +14,11 @@ class CreateCompletedStandardHandler(IHandler):
         self,
         create_completed_standards_from_text: CreateCompletedStandardsFromText,
         get_user: GetUser,
+        get_active_credit: GetActiveCredit,
     ):
         self.create_completed_standards_from_text = create_completed_standards_from_text
         self.get_user = get_user
+        self.get_active_credit = get_active_credit
 
     async def __call__(self, update: Update, user: User) -> str:
         input_message = update.message.text
@@ -30,6 +33,10 @@ class CreateCompletedStandardHandler(IHandler):
                 + "\n".join(f"- {k}: {v}" for k, v in created_standards.items())
             )
             result += f"\n\n**Оставшийся долг**: {user.total_liabilities} н."
+
+            credit = await self.get_active_credit(user.id)
+            if credit:
+                result += f"\n\n**Оставшийся зачет**: {credit.count - credit.completed_count} н."
         else:
             result = "Нифига не понял, что списать?"
 
