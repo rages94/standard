@@ -37,21 +37,18 @@ async def conversation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     chat_id = update.message.chat_id
     text_message = update.message.text
-    user: User = await auth_chat_manager.get_auth_user(chat_id)
+    user: User | None = await auth_chat_manager.get_auth_user(chat_id)
+    await create_message(MessageCreate(text=text_message, chat_id=chat_id, user_id=getattr(user, 'id')))
+
     if not user:
-        await create_message(MessageCreate(text=text_message, chat_id=chat_id))
-        await login_handler(update, user)
-        return
+        response = await login_handler(update, user)
+    else:
+        # TODO training ner model + распознавать текстовые числа + день/неделя/месяц
+        predictions = classifier_model.predict([text_message])
 
-    await create_message(MessageCreate(text=text_message, chat_id=chat_id, user_id=user.id))
-    # TODO training ner model + распознавать текстовые числа + день/неделя/месяц
-    predictions = classifier_model.predict([text_message])
-    response = None
-    if response:
-        await create_message(MessageCreate(text=response, chat_id=chat_id))
+        handler_func = handler_mapping.get(predictions[0])
+        response = await handler_func(update, user)
 
-    handler_func = handler_mapping.get(predictions[0])
-    response = await handler_func(update, user)
     if response:
         await create_message(MessageCreate(text=response, chat_id=chat_id))
 

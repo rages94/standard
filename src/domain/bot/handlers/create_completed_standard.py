@@ -36,7 +36,7 @@ class CreateCompletedStandardHandler(IHandler):
 
             credit = await self.get_active_credit(user.id)
             if credit:
-                result += f"\n\n**Оставшийся зачет**: {credit.count - credit.completed_count} н."
+                result += f"\n**Оставшийся зачет**: {credit.count - credit.completed_count} н."
         else:
             result = "Нифига не понял, что списать?"
 

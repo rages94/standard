@@ -102,7 +102,7 @@ class UseCasesContainer(containers.DeclarativeContainer):
     create_message = providers.Factory(CreateMessage, uow=repositories.uow)
 
     # telegram handlers
-    login_handler = providers.Factory(LoginHandler, create_auth_link=create_auth_link)
+    login_handler = providers.Factory(LoginHandler, create_auth_link=create_auth_link, config=config)
     create_liability_handler = providers.Factory(
         CreateLiabilityHandler,
         create_liabilities_from_text=create_liabilities_from_text,
