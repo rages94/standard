@@ -14,7 +14,7 @@ class RatingHandler(IHandler):
 
     async def __call__(self, update: Update, user: User) -> str:
         result = "`Рейтинг`:\n"
-        input_message = update.message.text
+        input_message = update.message.text if update.message else 'рейтинг'
         grouped_completed_standards: list[RatingGroupedCompletedStandard] = await self.get_rating_from_text(
             input_message, user.id
         )

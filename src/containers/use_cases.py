@@ -10,6 +10,7 @@ from src.domain.bot.handlers.other import OtherHandler
 from src.domain.bot.handlers.rating import RatingHandler
 from src.domain.bot.handlers.standard_history import StandardHistoryHandler
 from src.domain.bot.handlers.total_liabilities import TotalLiabilitiesHandler
+from src.domain.bot.use_cases.ping_user import PingUser
 from src.domain.bot.use_cases.send_message import BotSendMessage
 from src.domain.classifier.use_cases.classify import Classify
 from src.domain.completed_standards.use_cases.create import CreateCompletedStandard
@@ -23,6 +24,7 @@ from src.domain.liabilities.use_cases.create import CreateLiability
 from src.domain.liabilities.use_cases.create_from_text import CreateLiabilitiesFromText
 from src.domain.liabilities.use_cases.list import ListLiabilities
 from src.domain.liabilities.use_cases.list_from_text import ListLiabilitiesFromText
+from src.domain.llm.use_cases.generate import LLMGenerate
 from src.domain.messages.use_cases.create import CreateMessage
 from src.domain.ner.use_cases.normalize_phrase import NormalizePhrase
 from src.domain.ner.use_cases.parse_standards import ParseStandards
@@ -31,6 +33,7 @@ from src.domain.ner.use_cases.get_count_from_text import GetCountFromText
 from src.domain.rating.use_cases.get_rating_from_text import GetRatingFromText
 from src.domain.user.use_cases.check_auth_chat import AuthChatManager
 from src.domain.user.use_cases.get import GetUser
+from src.domain.user.use_cases.list import ListUsers
 
 
 class UseCasesContainer(containers.DeclarativeContainer):
@@ -98,6 +101,7 @@ class UseCasesContainer(containers.DeclarativeContainer):
     bot_send_message = providers.Factory(BotSendMessage, telegram_client=gateways.telegram_client)
 
     get_user = providers.Factory(GetUser, uow=repositories.uow)
+    list_users = providers.Factory(ListUsers, uow=repositories.uow)
 
     create_message = providers.Factory(CreateMessage, uow=repositories.uow)
 
@@ -133,7 +137,12 @@ class UseCasesContainer(containers.DeclarativeContainer):
     total_liabilities_handler = providers.Factory(TotalLiabilitiesHandler)
     other_handler = providers.Factory(OtherHandler)
 
-
-
-
-
+    llm_generate = providers.Factory(LLMGenerate, client=gateways.llm_client)
+    ping_user = providers.Factory(
+        PingUser,
+        list_completed_standards=list_completed_standards,
+        get_active_credit=get_active_credit,
+        llm_generate=llm_generate,
+        bot_send_message=bot_send_message,
+        config=config,
+    )

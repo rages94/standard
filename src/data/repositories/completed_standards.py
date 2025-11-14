@@ -1,5 +1,6 @@
 from collections import defaultdict
 from datetime import timedelta, datetime
+import operator as op
 from uuid import UUID
 
 from sqlalchemy import select, func
@@ -19,6 +20,7 @@ from src.domain.completed_standards.dto.output import (
 
 class CompletedStandardFilterSet(BaseFilterSet):
     id = Filter(CompletedStandard.id)
+    created_at_gte = Filter(CompletedStandard.created_at, lookup_expr=op.ge)
     standard_id = Filter(CompletedStandard.standard_id)
     user_id = Filter(CompletedStandard.user_id)
     pagination = LimitOffsetFilter()

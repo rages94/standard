@@ -15,7 +15,7 @@ class CreditHistoryHandler(IHandler):
     async def __call__(self, update: Update, user: User) -> str:
         status_mapping = {None: "в процессе", False: "завален", True: "выполнен"}
         result = "`История зачетов`:\n\n"
-        input_message = update.message.text
+        input_message = update.message.text if update.message else 'История зачетов'
         credits: list[CreditPublic] = await self.list_credits_from_text(
             input_message, user.id
         )

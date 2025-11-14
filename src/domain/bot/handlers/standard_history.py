@@ -14,7 +14,7 @@ class StandardHistoryHandler(IHandler):
 
     async def __call__(self, update: Update, user: User) -> str:
         result = "`История списаний`:\n\n"
-        input_message = update.message.text
+        input_message = update.message.text if update.message else 'История списаний'
         completed_standards: list[CompletedStandardPublic] = await self.list_completed_standards_from_text(
             input_message, user.id
         )

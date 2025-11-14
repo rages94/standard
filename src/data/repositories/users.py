@@ -1,4 +1,5 @@
 from uuid import UUID
+import operator as op
 
 from sqlalchemy import select, update
 from sqlalchemy.exc import NoResultFound
@@ -14,6 +15,7 @@ class UserFilterSet(BaseFilterSet):
     id = Filter(User.id)
     username = Filter(User.username)
     chat_id = Filter(User.telegram_chat_id)
+    chat_id_ne = Filter(User.telegram_chat_id, lookup_expr=op.ne)
     pagination = LimitOffsetFilter()
     order = OrderingFilter(
         created_at=OrderingField(User.created_at),

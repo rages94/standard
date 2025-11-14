@@ -2,6 +2,7 @@ from dependency_injector import containers, providers
 import spacy
 import joblib
 from telegram import Bot
+from ollama import AsyncClient
 
 from src.common.db import Database
 
@@ -12,3 +13,4 @@ class GatewaysContainer(containers.DeclarativeContainer):
     ner_model = providers.Singleton(spacy.load, name=config.ner_model.path)
     classifier_model = providers.Singleton(joblib.load, config.classifier_model.path)
     telegram_client = providers.Singleton(Bot, token=config.telegram.token)
+    llm_client = providers.Singleton(AsyncClient, host=config.llm_model.host)

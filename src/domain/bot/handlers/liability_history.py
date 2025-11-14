@@ -14,7 +14,7 @@ class LiabilityHistoryHandler(IHandler):
 
     async def __call__(self, update: Update, user: User) -> str:
         result = "`История долгов`:\n\n"
-        input_message = update.message.text
+        input_message = update.message.text if update.message else 'История долгов'
         liabilities: list[LiabilityPublic] = await self.list_liabilities_from_text(
             input_message, user.id
         )
