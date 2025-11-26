@@ -13,7 +13,7 @@ class Standard(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     name: str = Field(unique=True)
     normal_form: str | None = Field(nullable=True)
-    count: Decimal
+    count: Decimal | None = Field(nullable=True)
     created_at: datetime = Field(default_factory=datetime.now)
     is_deleted: bool = Field(sa_column=Column(Boolean, default=False, server_default='f', nullable=False))
 
@@ -22,7 +22,7 @@ class Standard(SQLModel, table=True):
 
 class StandardCreate(SQLModel):
     name: str
-    count: Decimal
+    count: Decimal | None = None
 
 
 class StandardUpdate(SQLModel):
@@ -34,4 +34,4 @@ class StandardPublic(SQLModel):
     id: UUID
     name: str
     normal_form: str | None = None
-    count: Decimal
+    count: Decimal | None = None

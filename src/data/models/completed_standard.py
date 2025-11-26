@@ -15,7 +15,7 @@ class CompletedStandard(SQLModel, table=True):
     __tablename__ = "completed_standard"
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     standard_id: UUID = Field(foreign_key="standard.id")
-    count: int
+    count: float
     user_id: UUID = Field(foreign_key="user.id")
     created_at: datetime = Field(default_factory=datetime.now)
 
@@ -25,7 +25,7 @@ class CompletedStandard(SQLModel, table=True):
 
 class CompletedStandardCreate(SQLModel):
     standard_id: UUID
-    count: int
+    count: float
     completed_type: CompletedType
 
     def completed_type_is_count(self) -> bool:
@@ -34,11 +34,11 @@ class CompletedStandardCreate(SQLModel):
 
 class CompletedStandardUpdate(SQLModel):
     standard_id: UUID | None = None
-    count: int | None = None
+    count: float | None = None
 
 
 class CompletedStandardPublic(SQLModel):
     id: UUID
-    count: int
+    count: float
     created_at: datetime
     standard: StandardPublic

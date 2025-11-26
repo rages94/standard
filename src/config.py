@@ -76,7 +76,7 @@ class NERModelSettings(BaseSettings):
     )
 
 class LLMModelSettings(BaseSettings):
-    name: str = 'gpt-oss:120b'
+    name: str = 'qwen3-coder:30b'
     host: str = '192.168.0.11:11434'
     activity_prompt: str = '''Ты — чат-бот спортивного приложения.
 Твоя миссия — мотивировать пользователя тренироваться, используя юмор и дружеский тон.

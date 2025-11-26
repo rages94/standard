@@ -12,7 +12,7 @@ class LiabilityTemplate(SQLModel, table=True):
     __tablename__ = "liability_template"
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     name: str = Field()
-    count: int
+    count: float
     normal_form: str | None = Field(nullable=True)
     is_deleted: bool = Field(sa_column=Column(Boolean, default=False, server_default='f', nullable=False))
     user_id: UUID = Field(foreign_key="user.id")
@@ -24,16 +24,16 @@ class LiabilityTemplate(SQLModel, table=True):
 
 class LiabilityTemplateCreate(SQLModel):
     name: str
-    count: int
+    count: float
 
 
 class LiabilityTemplateUpdate(SQLModel):
     name: str | None = None
-    count: int | None = None
+    count: float | None = None
 
 
 class LiabilityTemplatePublic(SQLModel):
     id: UUID
     name: str
-    count: int
+    count: float
     normal_form: str | None = None

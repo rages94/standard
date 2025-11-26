@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 class Liability(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     liability_template_id: UUID | None = Field(None, foreign_key="liability_template.id")
-    count: int
+    count: float
     user_id: UUID = Field(foreign_key="user.id")
     created_at: datetime = Field(default_factory=datetime.now)
 
@@ -23,16 +23,16 @@ class Liability(SQLModel, table=True):
 
 class LiabilityCreate(SQLModel):
     liability_template_id: UUID | None = None
-    count: int
+    count: float
 
 
 class LiabilityUpdate(SQLModel):
     liability_template_id: UUID | None = None
-    count: int | None = None
+    count: float | None = None
 
 
 class LiabilityPublic(SQLModel):
     id: UUID
-    count: int
+    count: float
     created_at: datetime
     liability_template: LiabilityTemplatePublic | None = None

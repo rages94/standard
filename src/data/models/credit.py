@@ -10,8 +10,8 @@ if TYPE_CHECKING:
 
 class Credit(SQLModel, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    count: int
-    completed_count: int
+    count: float
+    completed_count: float
     user_id: UUID = Field(foreign_key="user.id")
     created_at: datetime = Field(default_factory=datetime.now)
     deadline_date: date = Field(default_factory=datetime.now)
@@ -23,8 +23,8 @@ class Credit(SQLModel, table=True):
 
 class CreditPublic(SQLModel):
     id: UUID
-    count: int
-    completed_count: int
+    count: float
+    completed_count: float
     created_at: datetime
     deadline_date: date
     completed_at: datetime | None

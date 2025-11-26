@@ -19,7 +19,10 @@ class User(SQLModel, table=True):
     email: str | None = Field(unique=True, index=True)
     hashed_password: str
     created_at: datetime = Field(default_factory=datetime.now)
-    total_liabilities: int | None = Field(default=0, nullable=True)
+    weight: float = Field(default=70, nullable=False, sa_column_kwargs={"server_default": '70'})
+    sex: str = Field(default='male', nullable=False, sa_column_kwargs={"server_default": 'male'})
+    birthday: datetime | None = Field(nullable=True)
+    total_liabilities: float | None = Field(default=0, nullable=True)
     telegram_chat_id: int | None = Field(nullable=True, index=True)
     completed_type: str = Field(CompletedType.count.value, nullable=True)
 
@@ -39,7 +42,6 @@ class User(SQLModel, table=True):
         return pwd_context.verify(password, self.hashed_password)
 
 
-
 class UserCreate(SQLModel):
     username: str
     password: str
@@ -48,6 +50,9 @@ class UserCreate(SQLModel):
 class UserUpdate(SQLModel):
     email: str | None = None
     completed_type: CompletedType | None = None
+    weight: float | None = None
+    sex: str | None = None
+    birthday: datetime | None = None
 
 
 class UserLogin(SQLModel):

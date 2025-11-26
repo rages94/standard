@@ -33,6 +33,7 @@ scikit-learn = "^1.7.0"
 telegramify-markdown = "^0.5.1"
 ollama = "^0.6.0"
 aiocron = "^2.1"
+rapidfuzz = "^3.14.3"
 
 
 [tool.poetry.group.dev.dependencies]
