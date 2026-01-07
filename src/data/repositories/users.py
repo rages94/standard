@@ -50,7 +50,7 @@ class UserRepository(
             total += liability.count * (liability.liability_template.count if liability.liability_template else 1)
 
         for completed_standard in completed_standards:
-            total -= completed_standard.count // completed_standard.standard.count
+            total -= completed_standard.total_norm
 
         query = (
             update(User)

@@ -15,7 +15,10 @@ class CompletedStandard(SQLModel, table=True):
     __tablename__ = "completed_standard"
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     standard_id: UUID = Field(foreign_key="standard.id")
-    count: float
+    count: float  # TODO migration of total count
+    weight: float | None
+    user_weight: float | None
+    total_norm: float | None
     user_id: UUID = Field(foreign_key="user.id")
     created_at: datetime = Field(default_factory=datetime.now)
 
@@ -26,6 +29,9 @@ class CompletedStandard(SQLModel, table=True):
 class CompletedStandardCreate(SQLModel):
     standard_id: UUID
     count: float
+    weight: float | None = None
+    user_weight: float | None = None
+    total_norm: float | None = None
     completed_type: CompletedType
 
     def completed_type_is_count(self) -> bool:
@@ -35,10 +41,16 @@ class CompletedStandardCreate(SQLModel):
 class CompletedStandardUpdate(SQLModel):
     standard_id: UUID | None = None
     count: float | None = None
+    weight: float | None = None
+    user_weight: float | None = None
+    total_norm: float | None = None
 
 
 class CompletedStandardPublic(SQLModel):
     id: UUID
     count: float
+    weight: float | None = None
+    user_weight: float | None = None
+    total_norm: float | None = None
     created_at: datetime
-    standard: StandardPublic
+    standard: StandardPublic | None = None

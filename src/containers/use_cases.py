@@ -31,6 +31,7 @@ from src.domain.ner.use_cases.parse_standards import ParseStandards
 from src.domain.ner.use_cases.parse_liability_templates import ParseLiabilityTemplates
 from src.domain.ner.use_cases.get_count_from_text import GetCountFromText
 from src.domain.rating.use_cases.get_rating_from_text import GetRatingFromText
+from src.domain.standards.use_cases.match import MatchStandards
 from src.domain.user.use_cases.check_auth_chat import AuthChatManager
 from src.domain.user.use_cases.get import GetUser
 from src.domain.user.use_cases.list import ListUsers
@@ -40,7 +41,9 @@ class UseCasesContainer(containers.DeclarativeContainer):
     config = providers.Configuration()
     repositories = providers.DependenciesContainer()
     gateways = providers.DependenciesContainer()
+    services = providers.DependenciesContainer()
 
+    # TODO: move to containers(standard_container, {domain}_container etc.)
     normalize_phrase = providers.Singleton(NormalizePhrase)
     classify = providers.Factory(
         Classify,
@@ -59,6 +62,7 @@ class UseCasesContainer(containers.DeclarativeContainer):
         normalize_phrase=normalize_phrase,
     )
     get_count_from_text = providers.Factory(GetCountFromText, ner_model=gateways.ner_model)
+    match_standards = providers.Factory(MatchStandards, uow=repositories.uow)
 
     create_liability = providers.Factory(CreateLiability, uow=repositories.uow)
     create_liabilities_from_text = providers.Factory(
@@ -70,8 +74,10 @@ class UseCasesContainer(containers.DeclarativeContainer):
     create_completed_standard = providers.Factory(CreateCompletedStandard, uow=repositories.uow)
     create_completed_standards_from_text = providers.Factory(
         CreateCompletedStandardsFromText,
-        parse_standards=parse_standards,
+        match_standards=match_standards,
         create_completed_standard=create_completed_standard,
+        exercise_normalization=services.exercise_normalization,
+        normalize_phrase=normalize_phrase,
     )
     get_rating_from_text = providers.Factory(GetRatingFromText, uow=repositories.uow)
     list_completed_standards = providers.Factory(ListCompletedStandards, uow=repositories.uow)
@@ -115,7 +121,7 @@ class UseCasesContainer(containers.DeclarativeContainer):
     create_completed_standard_handler = providers.Factory(
         CreateCompletedStandardHandler,
         create_completed_standards_from_text=create_completed_standards_from_text,
-        get_user=get_user,
+        uow=repositories.uow,
         get_active_credit=get_active_credit,
     )
     rating_handler = providers.Factory(

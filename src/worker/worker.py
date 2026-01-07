@@ -12,7 +12,6 @@ from src.containers.container import container
 from src.data.models import User
 from src.data.models.message import MessageCreate
 from src.domain.classifier.dto.enums import TextClass
-from src.worker.tasks import ping_users
 
 
 config = container.config()
@@ -22,7 +21,7 @@ login_handler = container.use_cases.login_handler()
 classifier_model = container.gateways.classifier_model()
 ping_user = container.use_cases.ping_user()
 
-handler_mapping = {
+handler_mapping = {  # TODO factory class
     TextClass.completed_standards.value: container.use_cases.create_completed_standard_handler(),
     TextClass.liability.value: container.use_cases.create_liability_handler(),
     TextClass.rating.value: container.use_cases.rating_handler(),
@@ -54,7 +53,6 @@ async def conversation(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
             reply_markup=_build_menu_keyboard(),
         )
     else:
-        # TODO training ner model + распознавать текстовые числа + день/неделя/месяц
         predictions = classifier_model.predict([text_message])
 
         handler_func = handler_mapping.get(predictions[0])

@@ -3,6 +3,7 @@ from telegram import Update
 from telegram.constants import ParseMode
 
 from src.data.models import User
+from src.data.uow import UnitOfWork
 from src.domain.bot.interfaces import IHandler
 from src.domain.completed_standards.use_cases.create_from_text import CreateCompletedStandardsFromText
 from src.domain.credits.use_cases.get_active import GetActiveCredit
@@ -13,27 +14,34 @@ class CreateCompletedStandardHandler(IHandler):
     def __init__(
         self,
         create_completed_standards_from_text: CreateCompletedStandardsFromText,
-        get_user: GetUser,
+        uow: UnitOfWork,
         get_active_credit: GetActiveCredit,
     ):
         self.create_completed_standards_from_text = create_completed_standards_from_text
-        self.get_user = get_user
+        self.uow = uow
         self.get_active_credit = get_active_credit
 
     async def __call__(self, update: Update, user: User) -> str:
         input_message = update.message.text
-        created_standards = await self.create_completed_standards_from_text(
-            input_message, user.id, user.completed_type
+        created_standard = await self.create_completed_standards_from_text(
+            input_message, user, user.completed_type
         )
-        user = await self.get_user(user.id)
 
-        if created_standards:
+        if created_standard:
+            async with self.uow:
+                user = await self.uow.user_repo.get_one(dict(id=user.id))
+                standard = await self.uow.standard_repo.get_one(dict(id=created_standard.standard_id))
+
             result = (
-                "Списываю:\n"
-                + "\n".join(f"- {k}: {v}" for k, v in created_standards.items())
+                "Списываю:\n" +
+                f"- {standard.name}: {created_standard.count}" +
+                (
+                    f" x {created_standard.weight} кг., {created_standard.total_norm:.2f} норм"
+                    if created_standard.weight else
+                    f", {created_standard.total_norm:.2f} норм"
+                )
             )
-            result += f"\n\n**Оставшийся долг**: {user.total_liabilities} н."
-
+            result += f"\n\n**Оставшийся долг**: {user.total_liabilities:.2f} н."
             credit = await self.get_active_credit(user.id)
             if credit:
                 result += f"\n**Оставшийся зачет**: {credit.count - credit.completed_count} н."
