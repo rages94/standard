@@ -12,10 +12,8 @@ class BaseUnitOfWork(BaseAbstractUnitOfWork):
     def __init__(
             self,
             db: Database,
-            # event_router: IEventRouter
     ):
         self.db = db
-        # self.event_router = event_router
         self.events: list[AbstractEvent] = []
 
     async def __aenter__(self) -> None:

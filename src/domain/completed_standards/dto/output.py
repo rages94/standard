@@ -4,9 +4,10 @@ from pydantic import BaseModel
 
 from src.data.models.completed_standard import CompletedStandardPublic
 
+
 class Dataset(BaseModel):
     label: str
-    data: list[int]
+    data: list[float]
 
 
 class GroupedCompletedStandard(BaseModel):
@@ -16,8 +17,8 @@ class GroupedCompletedStandard(BaseModel):
 
 class UserCompletedStandard(BaseModel):
     username: str
-    count: int
-    standards: int
+    count: float
+    standards: float
 
 
 class RatingGroupedCompletedStandard(BaseModel):

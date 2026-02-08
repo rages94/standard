@@ -34,11 +34,11 @@ class CreateCompletedStandardHandler(IHandler):
 
             result = (
                 "Списываю:\n" +
-                f"- {standard.name}: {created_standard.count}" +
+                f"- {standard.name}: " +
                 (
-                    f" x {created_standard.weight} кг., {created_standard.total_norm:.2f} норм"
+                    f"{created_standard.weight} кг. x {int(created_standard.count)}, {created_standard.total_norm:.2f} норм"
                     if created_standard.weight else
-                    f", {created_standard.total_norm:.2f} норм"
+                    f"{int(created_standard.count)}, {created_standard.total_norm:.2f} норм"
                 )
             )
             result += f"\n\n**Оставшийся долг**: {user.total_liabilities:.2f} н."

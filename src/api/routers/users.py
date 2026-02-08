@@ -6,7 +6,7 @@ from fastapi_jwt import JwtAccessBearer, JwtRefreshBearer, JwtAuthorizationCrede
 
 from src.config import Settings
 from src.data.models import User
-from src.data.models.user import UserCreate, UserLogin, UserUpdate
+from src.data.models.user import UserCreate, UserLogin, UserUpdate, UserPublic
 from src.data.models.auth_link import UserBotLogin
 from src.data.uow import UnitOfWork
 from src.domain.jwt.dto.output import JwtResponse
@@ -24,10 +24,10 @@ refresh_bearer = JwtRefreshBearer(secret_key=settings.jwt.refresh_secret_key)
 async def register_user(
     body: UserCreate,
     uow: UnitOfWork = Depends(Provide["repositories.uow"])
-) -> User:
+) -> UserPublic:
     user = User(username=body.username, hashed_password=User.get_password_hash(body.password))
     async with uow:
-        existing_user = await uow.user_repo.filter(UserFilterSchema(username=body.username).model_dump())
+        existing_user = await uow.user_repo.filter(UserFilterSchema(username=body.username).model_dump(exclude_unset=True))
         if existing_user:
             raise HTTPException(status_code=400, detail="Пользователь с таким никнеймом уже существует!")
         uow.user_repo.add(user)
@@ -43,7 +43,7 @@ async def login(
     uow: UnitOfWork = Depends(Provide["repositories.uow"])
 ) -> JwtResponse:
     async with uow:
-        existing_user = await uow.user_repo.filter(UserFilterSchema(username=body.username).model_dump())
+        existing_user = await uow.user_repo.filter(UserFilterSchema(username=body.username).model_dump(exclude_unset=True))
         if not existing_user:
             raise HTTPException(status_code=401, detail="Неверный никнейм или пароль!")
         if not existing_user[0].check_password(body.password):
@@ -70,7 +70,7 @@ async def bot_login(
         if not existing_auth_link:
             raise HTTPException(status_code=400, detail="Ссылка недействительна!")
 
-        existing_user = await uow.user_repo.filter(UserFilterSchema(username=body.username).model_dump())
+        existing_user = await uow.user_repo.filter(UserFilterSchema(username=body.username).model_dump(exclude_unset=True))
         if not existing_user:
             raise HTTPException(status_code=401, detail="Неверный никнейм или пароль!")
 
@@ -95,7 +95,7 @@ async def bot_login(
 async def get_current_user(
     uow: UnitOfWork = Depends(Provide["repositories.uow"]),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
-) -> User:
+) -> UserPublic:
     async with uow:
         return await uow.user_repo.get_one(dict(id=credentials["id"]))
 

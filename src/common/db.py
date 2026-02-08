@@ -6,5 +6,4 @@ class Database:
         self.engine: AsyncEngine = create_async_engine(dsn)
         self.session_factory = async_sessionmaker(
             bind=self.engine,
-            # echo=echo,
         )

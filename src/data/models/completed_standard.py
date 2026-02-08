@@ -2,25 +2,26 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlmodel import SQLModel, Field, Relationship
+from sqlalchemy import Column, DateTime, func
+from sqlmodel import Field, Relationship, SQLModel
 
+from src.common.models.mixins import TimestampMixin
 from src.data.models.standard import StandardPublic
 from src.domain.user.dto.enums import CompletedType
 
 if TYPE_CHECKING:
-    from src.data.models import User, Standard
+    from src.data.models import Standard, User
 
 
-class CompletedStandard(SQLModel, table=True):
+class CompletedStandard(SQLModel, TimestampMixin, table=True):
     __tablename__ = "completed_standard"
     id: UUID = Field(default_factory=uuid4, primary_key=True)
     standard_id: UUID = Field(foreign_key="standard.id")
-    count: float  # TODO migration of total count
+    count: float
     weight: float | None
     user_weight: float | None
     total_norm: float | None
     user_id: UUID = Field(foreign_key="user.id")
-    created_at: datetime = Field(default_factory=datetime.now)
 
     user: "User" = Relationship(back_populates="completed_standards")
     standard: "Standard" = Relationship(back_populates="completed_standards")
@@ -42,8 +43,6 @@ class CompletedStandardUpdate(SQLModel):
     standard_id: UUID | None = None
     count: float | None = None
     weight: float | None = None
-    user_weight: float | None = None
-    total_norm: float | None = None
 
 
 class CompletedStandardPublic(SQLModel):
@@ -54,3 +53,4 @@ class CompletedStandardPublic(SQLModel):
     total_norm: float | None = None
     created_at: datetime
     standard: StandardPublic | None = None
+    user_id: UUID

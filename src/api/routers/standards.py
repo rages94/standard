@@ -1,12 +1,12 @@
 from uuid import UUID
 
-from dependency_injector.wiring import inject, Provide
-from fastapi import APIRouter, Security, Depends
-from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer, JwtRefreshBearer
+from dependency_injector.wiring import Provide, inject
+from fastapi import APIRouter, Depends, Security
+from fastapi_jwt import JwtAccessBearer, JwtAuthorizationCredentials, JwtRefreshBearer
 
 from src.config import Settings
 from src.data.models import Standard
-from src.data.models.standard import StandardUpdate, StandardCreate
+from src.data.models.standard import StandardCreate, StandardUpdate
 from src.data.uow import UnitOfWork
 
 settings = Settings()
@@ -17,7 +17,7 @@ refresh_bearer = JwtRefreshBearer(secret_key=settings.jwt.refresh_secret_key)
 
 @standard_router.post(
     "/",
-    responses={201: {"model": Standard}},
+    status_code=201,
 )
 @inject
 async def create_standard(
@@ -36,10 +36,7 @@ async def create_standard(
     return standard
 
 
-@standard_router.get(
-    "/",
-    responses={200: {"model": list[Standard]}},
-)
+@standard_router.get("/")
 @inject
 async def list_standards(
     uow: UnitOfWork = Depends(Provide["repositories.uow"]),
@@ -49,10 +46,7 @@ async def list_standards(
         return await uow.standard_repo.filter(dict(order={"created_at"}))
 
 
-@standard_router.patch(
-    "/{standard_id}",
-    responses={200: {"model": Standard}},
-)
+@standard_router.patch("/{standard_id}")
 @inject
 async def update_standard(
     standard_id: UUID,
@@ -61,9 +55,7 @@ async def update_standard(
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> Standard:
     async with uow:
-        standard = await uow.standard_repo.get_one(
-            {"id": standard_id}
-        )
+        standard = await uow.standard_repo.get_one({"id": standard_id})
         for k, v in body.model_dump(exclude_none=True).items():
             setattr(standard, k, v)
         uow.standard_repo.add(standard)
@@ -83,9 +75,7 @@ async def delete_standard(
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> None:
     async with uow:
-        standard = await uow.standard_repo.get_one(
-            {"id": standard_id}
-        )
+        standard = await uow.standard_repo.get_one({"id": standard_id})
         standard.is_deleted = True
         uow.standard_repo.add(standard)
         await uow.commit()
