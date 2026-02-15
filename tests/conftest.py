@@ -2,6 +2,7 @@ import asyncio
 import sys
 
 import pytest
+from fastapi_jwt import JwtRefreshBearer
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
@@ -82,7 +83,6 @@ async def client(_container):
 
 @pytest.fixture(scope="function")
 def auth_headers(default_user: User) -> dict:
-    from fastapi_jwt import JwtAccessBearer
     access_bearer = JwtAccessBearer(secret_key=settings.jwt.secret_key)
     token = access_bearer.create_access_token(subject={"id": str(default_user.id)})
     return {"Authorization": f"Bearer {token}"}
@@ -100,7 +100,6 @@ async def auth_client(_container, auth_headers: dict):
 
 @pytest.fixture(scope="function")
 def refresh_headers(default_user: User) -> dict:
-    from fastapi_jwt import JwtRefreshBearer
     refresh_bearer = JwtRefreshBearer(secret_key=settings.jwt.refresh_secret_key)
     token = refresh_bearer.create_refresh_token(subject={"id": str(default_user.id)})
     return {"Authorization": f"Bearer {token}"}
