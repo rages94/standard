@@ -3,7 +3,12 @@ from sqlalchemy.exc import IntegrityError, NoResultFound
 from starlette.middleware.cors import CORSMiddleware
 
 from src.api.router import include_routers
-from src.common.handlers.alchemy import integrity_error_handler, no_result_found_handler
+from src.common.handlers.alchemy import (
+    integrity_error_handler,
+    jwt_error_handler,
+    no_result_found_handler,
+)
+from authlib.jose.errors import BadSignatureError, ExpiredTokenError
 from src.containers.container import container
 
 
@@ -27,6 +32,8 @@ def create_app() -> fastapi.FastAPI:
 app = create_app()
 app.add_exception_handler(IntegrityError, integrity_error_handler)
 app.add_exception_handler(NoResultFound, no_result_found_handler)
+app.add_exception_handler(BadSignatureError, jwt_error_handler)
+app.add_exception_handler(ExpiredTokenError, jwt_error_handler)
 
 if __name__ == "__main__":
     import uvicorn

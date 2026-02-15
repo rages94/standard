@@ -1,7 +1,15 @@
+from authlib.jose.errors import BadSignatureError, ExpiredTokenError
 from fastapi import Request
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from starlette import status
 from starlette.responses import JSONResponse
+
+
+async def jwt_error_handler(request: Request, exc: BadSignatureError | ExpiredTokenError):
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content={"detail": "Неверный или истекший токен"},
+    )
 
 
 async def integrity_error_handler(request: Request, exc: IntegrityError):

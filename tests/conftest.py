@@ -1,8 +1,6 @@
 import asyncio
 import sys
-from datetime import datetime, timedelta, timezone
 
-import jwt
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import create_engine
@@ -84,15 +82,9 @@ async def client(_container):
 
 @pytest.fixture(scope="function")
 def auth_headers(default_user: User) -> dict:
-    secret = settings.jwt.secret_key
-    payload = {
-        "subject": {
-            "id": str(default_user.id),
-            "exp": int((datetime.now(timezone.utc) + timedelta(minutes=5)).timestamp()),
-            "sub": "auth",
-        }
-    }
-    token = jwt.encode(payload, secret, algorithm="HS256")
+    from fastapi_jwt import JwtAccessBearer
+    access_bearer = JwtAccessBearer(secret_key=settings.jwt.secret_key)
+    token = access_bearer.create_access_token(subject={"id": str(default_user.id)})
     return {"Authorization": f"Bearer {token}"}
 
 
@@ -102,5 +94,23 @@ async def auth_client(_container, auth_headers: dict):
     transport = ASGITransport(app=app)
     async with AsyncClient(
         transport=transport, base_url="http://test", headers=auth_headers
+    ) as client:
+        yield client
+
+
+@pytest.fixture(scope="function")
+def refresh_headers(default_user: User) -> dict:
+    from fastapi_jwt import JwtRefreshBearer
+    refresh_bearer = JwtRefreshBearer(secret_key=settings.jwt.refresh_secret_key)
+    token = refresh_bearer.create_refresh_token(subject={"id": str(default_user.id)})
+    return {"Authorization": f"Bearer {token}"}
+
+
+@pytest.fixture(scope="function")
+async def refresh_client(_container, refresh_headers: dict):
+    app.container = _container
+    transport = ASGITransport(app=app)
+    async with AsyncClient(
+        transport=transport, base_url="http://test", headers=refresh_headers
     ) as client:
         yield client
