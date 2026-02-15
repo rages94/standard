@@ -16,7 +16,9 @@ class LiabilityTemplate(SQLModel, TimestampMixin, table=True):
     name: str = Field()
     count: float
     normal_form: str | None = Field(nullable=True)
-    is_deleted: bool = Field(sa_column=Column(Boolean, default=False, server_default='f', nullable=False))
+    is_deleted: bool = Field(
+        sa_column=Column(Boolean, default=False, server_default="f", nullable=False)
+    )
     user_id: UUID = Field(foreign_key="user.id")
 
     user: "User" = Relationship(back_populates="liability_templates")
@@ -25,7 +27,7 @@ class LiabilityTemplate(SQLModel, TimestampMixin, table=True):
 
 class LiabilityTemplateCreate(SQLModel):
     name: str
-    count: float
+    count: float = Field(..., gt=0)
 
 
 class LiabilityTemplateUpdate(SQLModel):

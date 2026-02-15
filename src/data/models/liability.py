@@ -13,7 +13,9 @@ if TYPE_CHECKING:
 
 class Liability(SQLModel, TimestampMixin, table=True):
     id: UUID = Field(default_factory=uuid4, primary_key=True)
-    liability_template_id: UUID | None = Field(None, foreign_key="liability_template.id")
+    liability_template_id: UUID | None = Field(
+        None, foreign_key="liability_template.id"
+    )
     count: float
     user_id: UUID = Field(foreign_key="user.id")
 
@@ -23,12 +25,12 @@ class Liability(SQLModel, TimestampMixin, table=True):
 
 class LiabilityCreate(SQLModel):
     liability_template_id: UUID | None = None
-    count: float
+    count: float = Field(..., gt=0)
 
 
 class LiabilityUpdate(SQLModel):
     liability_template_id: UUID | None = None
-    count: float | None = None
+    count: float | None = Field(None, gt=0, description="Количество для обязательства")
 
 
 class LiabilityPublic(SQLModel):

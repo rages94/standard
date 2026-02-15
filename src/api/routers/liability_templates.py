@@ -1,11 +1,16 @@
 from uuid import UUID
 
-from dependency_injector.wiring import inject, Provide
-from fastapi import APIRouter, Security, Depends
-from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer, JwtRefreshBearer
+from dependency_injector.wiring import Provide, inject
+from fastapi import APIRouter, Depends, Security
+from fastapi_jwt import JwtAccessBearer, JwtAuthorizationCredentials, JwtRefreshBearer
 
 from src.config import Settings
-from src.data.models.liability_template import LiabilityTemplateCreate, LiabilityTemplate, LiabilityTemplateUpdate
+from src.data.models.liability_template import (
+    LiabilityTemplate,
+    LiabilityTemplateCreate,
+    LiabilityTemplatePublic,
+    LiabilityTemplateUpdate,
+)
 from src.data.uow import UnitOfWork
 
 settings = Settings()
@@ -16,19 +21,17 @@ refresh_bearer = JwtRefreshBearer(secret_key=settings.jwt.refresh_secret_key)
 
 @liability_template_router.post(
     "/",
-    responses={201: {"model": LiabilityTemplate}},
+    status_code=201,
 )
 @inject
 async def create_liability_template(
     body: LiabilityTemplateCreate,
     uow: UnitOfWork = Depends(Provide["repositories.uow"]),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
-) -> LiabilityTemplate:
+) -> LiabilityTemplatePublic:
     async with uow:
         liability_template = LiabilityTemplate(
-            name=body.name,
-            count=body.count,
-            user_id=credentials["id"]
+            name=body.name, count=body.count, user_id=credentials["id"]
         )
         uow.liability_template_repo.add(liability_template)
         await uow.commit()
@@ -44,7 +47,7 @@ async def create_liability_template(
 async def list_liability_templates(
     uow: UnitOfWork = Depends(Provide["repositories.uow"]),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
-) -> list[LiabilityTemplate]:
+) -> list[LiabilityTemplatePublic]:
     async with uow:
         return await uow.liability_template_repo.filter(dict(user_id=credentials["id"]))
 
@@ -59,7 +62,7 @@ async def update_liability_template(
     body: LiabilityTemplateUpdate,
     uow: UnitOfWork = Depends(Provide["repositories.uow"]),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
-) -> LiabilityTemplate:
+) -> LiabilityTemplatePublic:
     user_id = credentials["id"]
     async with uow:
         liability_template = await uow.liability_template_repo.get_one(

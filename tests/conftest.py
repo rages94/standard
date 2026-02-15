@@ -1,9 +1,5 @@
 import asyncio
 import sys
-
-if sys.platform.startswith("win"):
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
-
 from datetime import datetime, timedelta, timezone
 
 import jwt
@@ -17,7 +13,6 @@ from src.api.main import app
 from src.config import Settings
 from src.containers.container import container
 from src.data.models import User
-from tests.factories.users import UserFactory
 from tests.utils.db import FakeDatabase, create_database, drop_database
 
 settings = Settings()
@@ -26,7 +21,12 @@ pytest_plugins = [
     "tests.fixtures.standards",
     "tests.fixtures.completed_standards",
     "tests.fixtures.users",
+    "tests.fixtures.liability_templates",
+    "tests.fixtures.liabilities",
 ]
+
+if sys.platform.startswith("win"):
+    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
 
 
 @pytest.fixture(scope="session")
