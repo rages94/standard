@@ -1,7 +1,8 @@
 from asyncio import gather
-from datetime import datetime, timedelta
+from datetime import timedelta
 from uuid import UUID
 
+from src.common.models.mixins import utcnow
 from src.domain.bot.use_cases.send_message import BotSendMessage
 from src.domain.completed_standards.dto.filter import CompletedStandardFilterSchema
 from src.domain.completed_standards.use_cases.list import ListCompletedStandards
@@ -27,7 +28,7 @@ class PingUser:
     async def __call__(self, user_id: UUID, chat_id: int) -> None:
         params = CompletedStandardFilterSchema(
             user_id=user_id,
-            created_at_gte=datetime.now().date() - timedelta(days=3),
+            created_at_gte=utcnow().date() - timedelta(days=3),
         )
         completed_standards, active_credit = await gather(
             self.list_completed_standards(params),

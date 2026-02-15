@@ -1,6 +1,6 @@
 import abc
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Generic, MutableSequence, Type, TypeVar
 
 from pydantic import BaseModel
@@ -16,7 +16,7 @@ class AbstractEvent(abc.ABC, Generic[EventSchema]):
     def __init__(self) -> None:
         self._headers: dict[str, bytes] = {
             "EventId": str(uuid.uuid4()).encode(),
-            "OccuredOn": datetime.utcnow().isoformat().encode(),
+            "OccuredOn": datetime.now(timezone.utc).isoformat().encode(),
         }
 
     @abc.abstractmethod

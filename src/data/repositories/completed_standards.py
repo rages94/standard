@@ -1,6 +1,6 @@
 import operator as op
 from collections import defaultdict
-from datetime import datetime, timedelta
+from datetime import timedelta
 from uuid import UUID
 
 from sqlalchemy import Date, func, select
@@ -14,6 +14,7 @@ from sqlalchemy_filterset import (
     OrderingFilter,
 )
 
+from src.common.models.mixins import utcnow
 from src.common.repository.base import Repository
 from src.data.models import CompletedStandard, Standard, User
 from src.domain.completed_standards.dto.output import (
@@ -104,7 +105,7 @@ class CompletedStandardRepository(
         )
         if days:
             query = query.filter(
-                CompletedStandard.created_at >= datetime.now() - timedelta(days=days)
+                CompletedStandard.created_at >= utcnow() - timedelta(days=days)
             )
         results = (await self.session.execute(query)).all()
         data = defaultdict(list)

@@ -1,9 +1,8 @@
-from datetime import datetime
-
 from dependency_injector.wiring import inject, Provide
 from fastapi import APIRouter, Security, Depends, Query
 from fastapi_jwt import JwtAuthorizationCredentials, JwtAccessBearer, JwtRefreshBearer
 
+from src.common.models.mixins import utcnow
 from src.config import Settings
 from src.data.models import Credit
 from src.data.uow import UnitOfWork
@@ -26,7 +25,7 @@ async def get_credit(
 ) -> Credit:
     user_id = credentials["id"]
     async with uow:
-        return await uow.credit_repo.get_one(dict(user_id=user_id, deadline_date_ge=datetime.now().date()))  # TODO timezone
+        return await uow.credit_repo.get_one(dict(user_id=user_id, deadline_date_ge=utcnow()))
 
 
 @credit_router.get(

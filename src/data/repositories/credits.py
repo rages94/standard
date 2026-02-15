@@ -1,5 +1,5 @@
 import operator as op
-from datetime import datetime, timedelta
+from datetime import timedelta
 from uuid import UUID
 
 from dateutil.relativedelta import relativedelta
@@ -8,6 +8,7 @@ from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy_filterset import BaseFilterSet, Filter, OrderingFilter, OrderingField, LimitOffsetFilter
 
+from src.common.models.mixins import utcnow
 from src.common.repository.base import Repository
 from src.data.models import Credit
 
@@ -36,17 +37,17 @@ class CreditRepository(
     query = select(Credit).order_by(Credit.created_at.desc())
 
     async def update_completed_count(self, user_id: UUID, completed_count: int) -> None:
-        params = dict(user_id=user_id, deadline_date_ge=datetime.now().date())  # TODO timezone
+        params = dict(user_id=user_id, deadline_date_ge=utcnow())
         credit = await self.get_one(params)
         credit.completed_count += completed_count
         if credit.completed_count >= credit.count and not credit.completed:
-            credit.completed_at = datetime.now()
+            credit.completed_at = utcnow()
             credit.completed = True
         self.session.add(credit)
         await self.session.flush()
 
     async def mark_uncompleted(self) -> None:
-        params = dict(deadline_date_lt=datetime.now().date(), completed=None)
+        params = dict(deadline_date_lt=utcnow(), completed=None)
         query = (
             update(Credit)
             .values({'completed': False})
@@ -57,14 +58,14 @@ class CreditRepository(
 
     # TODO by user settings
     async def create_by_user(self, user_id: UUID, total_liabilities: int) -> None:
-        params = dict(user_id=user_id, deadline_date_ge=datetime.now().date())
+        params = dict(user_id=user_id, deadline_date_ge=utcnow())
         try:
             await self.get_one(params)
             return
         except NoResultFound:
             pass
 
-        now = datetime.now()
+        now = utcnow()
         count_credit_months = 13 - now.month
         count_credit = total_liabilities//count_credit_months
         credit = Credit(

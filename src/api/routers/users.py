@@ -1,9 +1,8 @@
-from datetime import datetime
-
 from dependency_injector.wiring import Provide, inject
 from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi_jwt import JwtAccessBearer, JwtAuthorizationCredentials, JwtRefreshBearer
 
+from src.common.models.mixins import utcnow
 from src.config import Settings
 from src.data.models import User
 from src.data.models.auth_link import UserBotLogin
@@ -76,7 +75,7 @@ async def bot_login(
             AuthLinkFilterSchema(
                 id=body.token,
                 user_id=None,
-                expire_datetime_gt=datetime.now(),
+                expire_datetime_gt=utcnow(),
             ).model_dump()
         )
         if not existing_auth_link:
