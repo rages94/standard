@@ -2,7 +2,7 @@ import asyncio
 import sys
 
 import pytest
-from fastapi_jwt import JwtRefreshBearer
+from fastapi_jwt import JwtAccessBearer, JwtRefreshBearer
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
