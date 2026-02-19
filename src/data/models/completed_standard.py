@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import Column, DateTime, func
 from sqlmodel import Field, Relationship, SQLModel
 
 from src.common.models.mixins import TimestampMixin

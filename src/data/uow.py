@@ -7,6 +7,12 @@ from src.data.repositories.message import MessageRepository
 from src.data.repositories.standards import StandardRepository
 from src.data.repositories.users import UserRepository
 from src.data.repositories.credits import CreditRepository
+from src.data.repositories.achievements import (
+    AchievementRepository,
+    UserAchievementProgressRepository,
+    UserAchievementRepository,
+    UserStreakRepository,
+)
 
 
 class UnitOfWork(BaseUnitOfWork):
@@ -20,3 +26,9 @@ class UnitOfWork(BaseUnitOfWork):
         self.credit_repo = CreditRepository(self.session)
         self.auth_link_repo = AuthLinkRepository(self.session)
         self.message_repo = MessageRepository(self.session)
+        self.achievement_repo = AchievementRepository(self.session)
+        self.user_achievement_repo = UserAchievementRepository(self.session)
+        self.user_achievement_progress_repo = UserAchievementProgressRepository(
+            self.session
+        )
+        self.user_streak_repo = UserStreakRepository(self.session)

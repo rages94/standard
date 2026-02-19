@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import func
-from sqlmodel import Column, DateTime, Field
+from sqlmodel import DateTime, Field
 
 
 def utcnow():

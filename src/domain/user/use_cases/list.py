@@ -1,4 +1,3 @@
-from uuid import UUID
 
 from src.data.models import User
 from src.data.uow import UnitOfWork

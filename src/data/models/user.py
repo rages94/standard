@@ -16,6 +16,9 @@ if TYPE_CHECKING:
         Liability,
         LiabilityTemplate,
         Message,
+        UserAchievement,
+        UserAchievementProgress,
+        UserStreak,
     )
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -43,6 +46,11 @@ class User(TimestampMixin, SQLModel, table=True):
     credits: list["Credit"] = Relationship(back_populates="user")
     liability_templates: list["LiabilityTemplate"] = Relationship(back_populates="user")
     auth_links: list["AuthLink"] = Relationship(back_populates="user")
+    achievements: list["UserAchievement"] = Relationship(back_populates="user")
+    achievement_progress: list["UserAchievementProgress"] = Relationship(
+        back_populates="user"
+    )
+    streak: "UserStreak" = Relationship(back_populates="user")
 
     @staticmethod
     def get_password_hash(password: str) -> str:

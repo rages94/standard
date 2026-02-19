@@ -1,3 +1,4 @@
+from datetime import datetime
 from uuid import UUID
 
 from dependency_injector.wiring import Provide, inject
@@ -13,6 +14,9 @@ from src.data.models.completed_standard import (
     CompletedStandardUpdate,
 )
 from src.data.uow import UnitOfWork
+from src.domain.achievements.use_cases.check_and_update import (
+    CheckAndUpdateAchievements,
+)
 from src.domain.completed_standards.dto.output import (
     CompletedStandardListResponse,
     GroupedCompletedStandard,
@@ -37,6 +41,9 @@ async def create_completed_standard(  # TODO check weightlifting(write tests)
     exercise_normalization: ExerciseNormalizationService = Depends(
         Provide["services.exercise_normalization"]
     ),
+    check_and_update_achievements: CheckAndUpdateAchievements = Depends(
+        Provide["use_cases.check_and_update_achievements"]
+    ),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> CompletedStandard:
     user_id = credentials["id"]
@@ -55,7 +62,7 @@ async def create_completed_standard(  # TODO check weightlifting(write tests)
             total_norm = (
                 body.count
                 if not body.completed_type_is_count()
-                else body.count * float(standard.count)
+                else body.count / float(standard.count)
             )
 
         completed_standard = CompletedStandard(
@@ -78,6 +85,14 @@ async def create_completed_standard(  # TODO check weightlifting(write tests)
             pass
         await uow.commit()
         await uow.refresh(completed_standard)
+        await uow.refresh(standard)
+
+        # Проверяем и обновляем достижения
+        await check_and_update_achievements(
+            user_id=user_id,
+            standard_id=standard.id,
+            activity_date=datetime.now().date(),
+        )
     return completed_standard
 
 
@@ -136,6 +151,9 @@ async def update_completed_standard(
     completed_standard_id: UUID,
     body: CompletedStandardUpdate,
     uow: UnitOfWork = Depends(Provide["repositories.uow"]),
+    check_and_update_achievements: CheckAndUpdateAchievements = Depends(
+        Provide["use_cases.check_and_update_achievements"]
+    ),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> CompletedStandard:
     user_id = credentials["id"]
@@ -152,6 +170,13 @@ async def update_completed_standard(
         # TODO update credit
         await uow.commit()
         await uow.refresh(completed_standard)
+
+        # Проверяем и обновляем достижения
+        await check_and_update_achievements(
+            user_id=user_id,
+            standard_id=completed_standard.standard_id,
+            activity_date=datetime.now().date(),
+        )
     return completed_standard
 
 
@@ -163,15 +188,26 @@ async def update_completed_standard(
 async def delete_completed_standard(
     completed_standard_id: UUID,
     uow: UnitOfWork = Depends(Provide["repositories.uow"]),
+    check_and_update_achievements: CheckAndUpdateAchievements = Depends(
+        Provide["use_cases.check_and_update_achievements"]
+    ),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> None:
     user_id = credentials["id"]
     async with uow:
-        await uow.completed_standard_repo.get_one(
+        completed_standard = await uow.completed_standard_repo.get_one(
             {"id": completed_standard_id, "user_id": user_id}
         )
+        standard_id = completed_standard.standard_id
         await uow.completed_standard_repo.delete(completed_standard_id)
         await uow.flush()
         await uow.user_repo.update_total_liabilities(user_id)  # TODO events
         # TODO update credit
         await uow.commit()
+
+        # Проверяем и обновляем достижения
+        await check_and_update_achievements(
+            user_id=user_id,
+            standard_id=standard_id,
+            activity_date=datetime.now().date(),
+        )

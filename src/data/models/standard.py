@@ -1,9 +1,7 @@
-from datetime import datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING
 from uuid import UUID, uuid4
 
-from sqlalchemy import DateTime, func
 from sqlmodel import Boolean, Column, Field, Relationship, SQLModel
 
 from src.common.models.mixins import TimestampMixin
@@ -17,6 +15,7 @@ class Standard(SQLModel, TimestampMixin, table=True):
     name: str = Field(unique=True)
     normal_form: str | None = Field(nullable=True)
     count: Decimal | None = Field(nullable=True)
+    category: str | None = Field(nullable=True, index=True)
     is_deleted: bool = Field(
         sa_column=Column(Boolean, default=False, server_default="f", nullable=False)
     )
@@ -29,11 +28,13 @@ class Standard(SQLModel, TimestampMixin, table=True):
 class StandardCreate(SQLModel):
     name: str
     count: Decimal | None = None
+    category: str | None = None
 
 
 class StandardUpdate(SQLModel):
     name: str | None = None
     count: Decimal | None = None
+    category: str | None = None
 
 
 class StandardPublic(SQLModel):
@@ -41,3 +42,4 @@ class StandardPublic(SQLModel):
     name: str
     normal_form: str | None = None
     count: Decimal | None = None
+    category: str | None = None

@@ -2,7 +2,6 @@ from uuid import UUID
 
 from src.data.uow import UnitOfWork
 from src.domain.completed_standards.dto.output import RatingGroupedCompletedStandard
-from src.domain.ner.dto.enums import ParamType
 
 
 class GetRatingFromText:

@@ -1,9 +1,23 @@
 from dependency_injector import containers, providers
 
+from src.domain.achievements.use_cases.check_and_update import (
+    CheckAndUpdateAchievements,
+)
+from src.domain.achievements.use_cases.get_user_earned import GetUserEarnedAchievements
+from src.domain.achievements.use_cases.get_user_streak import GetUserStreak
+from src.domain.achievements.use_cases.list import (
+    ListAchievements,
+)
+from src.domain.achievements.use_cases.get_achievement_categories import GetAchievementCategories
+from src.domain.achievements.use_cases.list_by_category import (
+    ListAchievementsByCategory,
+)
 from src.domain.auth_link.use_cases.create import CreateAuthLink
-from src.domain.bot.handlers.credit_history import CreditHistoryHandler
-from src.domain.bot.handlers.create_completed_standard import CreateCompletedStandardHandler
+from src.domain.bot.handlers.create_completed_standard import (
+    CreateCompletedStandardHandler,
+)
 from src.domain.bot.handlers.create_liability import CreateLiabilityHandler
+from src.domain.bot.handlers.credit_history import CreditHistoryHandler
 from src.domain.bot.handlers.liability_history import LiabilityHistoryHandler
 from src.domain.bot.handlers.login import LoginHandler
 from src.domain.bot.handlers.other import OtherHandler
@@ -14,22 +28,26 @@ from src.domain.bot.use_cases.ping_user import PingUser
 from src.domain.bot.use_cases.send_message import BotSendMessage
 from src.domain.classifier.use_cases.classify import Classify
 from src.domain.completed_standards.use_cases.create import CreateCompletedStandard
-from src.domain.completed_standards.use_cases.create_from_text import CreateCompletedStandardsFromText
+from src.domain.completed_standards.use_cases.create_from_text import (
+    CreateCompletedStandardsFromText,
+)
 from src.domain.completed_standards.use_cases.list import ListCompletedStandards
-from src.domain.completed_standards.use_cases.list_from_text import ListCompletedStandardsFromText
+from src.domain.completed_standards.use_cases.list_from_text import (
+    ListCompletedStandardsFromText,
+)
 from src.domain.credits.use_cases.get_active import GetActiveCredit
-from src.domain.credits.use_cases.list_from_text import ListCreditsFromText
 from src.domain.credits.use_cases.list import ListCredits
+from src.domain.credits.use_cases.list_from_text import ListCreditsFromText
 from src.domain.liabilities.use_cases.create import CreateLiability
 from src.domain.liabilities.use_cases.create_from_text import CreateLiabilitiesFromText
 from src.domain.liabilities.use_cases.list import ListLiabilities
 from src.domain.liabilities.use_cases.list_from_text import ListLiabilitiesFromText
 from src.domain.llm.use_cases.generate import LLMGenerate
 from src.domain.messages.use_cases.create import CreateMessage
-from src.domain.ner.use_cases.normalize_phrase import NormalizePhrase
-from src.domain.ner.use_cases.parse_standards import ParseStandards
-from src.domain.ner.use_cases.parse_liability_templates import ParseLiabilityTemplates
 from src.domain.ner.use_cases.get_count_from_text import GetCountFromText
+from src.domain.ner.use_cases.normalize_phrase import NormalizePhrase
+from src.domain.ner.use_cases.parse_liability_templates import ParseLiabilityTemplates
+from src.domain.ner.use_cases.parse_standards import ParseStandards
 from src.domain.rating.use_cases.get_rating_from_text import GetRatingFromText
 from src.domain.standards.use_cases.match import MatchStandards
 from src.domain.user.use_cases.check_auth_chat import AuthChatManager
@@ -61,7 +79,9 @@ class UseCasesContainer(containers.DeclarativeContainer):
         uow=repositories.uow,
         normalize_phrase=normalize_phrase,
     )
-    get_count_from_text = providers.Factory(GetCountFromText, ner_model=gateways.ner_model)
+    get_count_from_text = providers.Factory(
+        GetCountFromText, ner_model=gateways.ner_model
+    )
     match_standards = providers.Factory(MatchStandards, uow=repositories.uow)
 
     create_liability = providers.Factory(CreateLiability, uow=repositories.uow)
@@ -71,7 +91,9 @@ class UseCasesContainer(containers.DeclarativeContainer):
         create_liability=create_liability,
     )
 
-    create_completed_standard = providers.Factory(CreateCompletedStandard, uow=repositories.uow)
+    create_completed_standard = providers.Factory(
+        CreateCompletedStandard, uow=repositories.uow
+    )
     create_completed_standards_from_text = providers.Factory(
         CreateCompletedStandardsFromText,
         match_standards=match_standards,
@@ -80,7 +102,9 @@ class UseCasesContainer(containers.DeclarativeContainer):
         normalize_phrase=normalize_phrase,
     )
     get_rating_from_text = providers.Factory(GetRatingFromText, uow=repositories.uow)
-    list_completed_standards = providers.Factory(ListCompletedStandards, uow=repositories.uow)
+    list_completed_standards = providers.Factory(
+        ListCompletedStandards, uow=repositories.uow
+    )
     list_completed_standards_from_text = providers.Factory(
         ListCompletedStandardsFromText,
         get_count_from_text=get_count_from_text,
@@ -104,7 +128,9 @@ class UseCasesContainer(containers.DeclarativeContainer):
 
     auth_chat_manager = providers.Singleton(AuthChatManager, uow=repositories.uow)
     create_auth_link = providers.Factory(CreateAuthLink, uow=repositories.uow)
-    bot_send_message = providers.Factory(BotSendMessage, telegram_client=gateways.telegram_client)
+    bot_send_message = providers.Factory(
+        BotSendMessage, telegram_client=gateways.telegram_client
+    )
 
     get_user = providers.Factory(GetUser, uow=repositories.uow)
     list_users = providers.Factory(ListUsers, uow=repositories.uow)
@@ -112,7 +138,9 @@ class UseCasesContainer(containers.DeclarativeContainer):
     create_message = providers.Factory(CreateMessage, uow=repositories.uow)
 
     # telegram handlers
-    login_handler = providers.Factory(LoginHandler, create_auth_link=create_auth_link, config=config)
+    login_handler = providers.Factory(
+        LoginHandler, create_auth_link=create_auth_link, config=config
+    )
     create_liability_handler = providers.Factory(
         CreateLiabilityHandler,
         create_liabilities_from_text=create_liabilities_from_text,
@@ -152,3 +180,17 @@ class UseCasesContainer(containers.DeclarativeContainer):
         bot_send_message=bot_send_message,
         config=config,
     )
+
+    # achievements use cases
+    list_achievements = providers.Factory(ListAchievements, uow=repositories.uow)
+    list_achievements_by_category = providers.Factory(
+        ListAchievementsByCategory, uow=repositories.uow
+    )
+    get_user_earned_achievements = providers.Factory(
+        GetUserEarnedAchievements, uow=repositories.uow
+    )
+    get_user_streak = providers.Factory(GetUserStreak, uow=repositories.uow)
+    check_and_update_achievements = providers.Factory(
+        CheckAndUpdateAchievements, uow=repositories.uow
+    )
+    get_achievement_categories = providers.Factory(GetAchievementCategories)

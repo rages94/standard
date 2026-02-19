@@ -1,6 +1,6 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class CompletedType(Enum):
+class CompletedType(StrEnum):
     standard = "standard"
     count = "count"

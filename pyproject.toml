@@ -35,6 +35,7 @@ ollama = "^0.6.0"
 aiocron = "^2.1"
 rapidfuzz = "^3.14.3"
 psycopg2 = "^2.9.11"
+loguru = "^0.7.3"
 
 
 [tool.poetry.group.dev.dependencies]

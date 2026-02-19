@@ -1,9 +1,7 @@
 import pytest
 
 from src.data.models import Standard, User
-from src.domain.math.dto.enums import ExerciseEnum
 from tests.factories.completed_standards import CompletedStandardFactory
-from tests.factories.standards import StandardFactory
 
 
 @pytest.fixture

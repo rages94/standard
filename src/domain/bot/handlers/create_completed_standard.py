@@ -7,7 +7,6 @@ from src.data.uow import UnitOfWork
 from src.domain.bot.interfaces import IHandler
 from src.domain.completed_standards.use_cases.create_from_text import CreateCompletedStandardsFromText
 from src.domain.credits.use_cases.get_active import GetActiveCredit
-from src.domain.user.use_cases.get import GetUser
 
 
 class CreateCompletedStandardHandler(IHandler):

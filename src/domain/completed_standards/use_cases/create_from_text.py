@@ -1,6 +1,6 @@
 from src.data.models import User
 from src.domain.completed_standards.use_cases.create import CreateCompletedStandard
-from src.data.models.completed_standard import CompletedStandardCreate, CompletedStandardPublic, CompletedStandard
+from src.data.models.completed_standard import CompletedStandardCreate, CompletedStandard
 from src.domain.math.services.normalization import ExerciseNormalizationService
 from src.domain.ner.use_cases.normalize_phrase import NormalizePhrase
 from src.domain.standards.dto.enums import ExerciseType

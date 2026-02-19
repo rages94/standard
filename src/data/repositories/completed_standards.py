@@ -52,7 +52,9 @@ class CompletedStandardRepository(
     )
 
     async def grouped_list(
-        self, user_id: UUID, as_standard: bool = False
+        self,
+        user_id: UUID,
+        as_standard: bool = False,  # TODO rm as_standard
     ) -> GroupedCompletedStandard:
         query = (
             select(
@@ -100,7 +102,7 @@ class CompletedStandardRepository(
                 User.username,
                 Standard.name,
             )
-            .where(Standard.is_deleted == False)
+            .where(Standard.is_deleted == False)  # type: ignore
             .order_by(func.sum(CompletedStandard.total_norm).desc())
         )
         if days:

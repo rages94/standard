@@ -1,6 +1,12 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy_filterset import BaseFilterSet, Filter, LimitOffsetFilter, OrderingFilter, OrderingField
+from sqlalchemy_filterset import (
+    BaseFilterSet,
+    Filter,
+    LimitOffsetFilter,
+    OrderingField,
+    OrderingFilter,
+)
 
 from src.common.repository.base import Repository
 from src.data.models import LiabilityTemplate
@@ -24,4 +30,4 @@ class LiabilityTemplateRepository(
 ):
     model = LiabilityTemplate
     filter_set = LiabilityTemplateFilterSet
-    query = select(LiabilityTemplate).where(LiabilityTemplate.is_deleted == False)
+    query = select(LiabilityTemplate).where(LiabilityTemplate.is_deleted == False)  # type: ignore
