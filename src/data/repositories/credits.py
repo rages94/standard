@@ -6,7 +6,13 @@ from dateutil.relativedelta import relativedelta
 from sqlalchemy import select, update
 from sqlalchemy.exc import NoResultFound
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy_filterset import BaseFilterSet, Filter, OrderingFilter, OrderingField, LimitOffsetFilter
+from sqlalchemy_filterset import (
+    BaseFilterSet,
+    Filter,
+    LimitOffsetFilter,
+    OrderingField,
+    OrderingFilter,
+)
 
 from src.common.models.mixins import utcnow
 from src.common.repository.base import Repository
@@ -36,7 +42,7 @@ class CreditRepository(
     filter_set = CreditFilterSet
     query = select(Credit).order_by(Credit.created_at.desc())
 
-    async def update_completed_count(self, user_id: UUID, completed_count: int) -> None:
+    async def update_completed_count(self, user_id: UUID, completed_count: float) -> None:
         params = dict(user_id=user_id, deadline_date_ge=utcnow())
         credit = await self.get_one(params)
         credit.completed_count += completed_count

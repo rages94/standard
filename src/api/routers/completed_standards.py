@@ -151,6 +151,9 @@ async def update_completed_standard(
     completed_standard_id: UUID,
     body: CompletedStandardUpdate,
     uow: UnitOfWork = Depends(Provide["repositories.uow"]),
+    exercise_normalization: ExerciseNormalizationService = Depends(
+        Provide["services.exercise_normalization"]
+    ),
     check_and_update_achievements: CheckAndUpdateAchievements = Depends(
         Provide["use_cases.check_and_update_achievements"]
     ),
@@ -161,13 +164,48 @@ async def update_completed_standard(
         completed_standard = await uow.completed_standard_repo.get_one(
             {"id": completed_standard_id, "user_id": user_id}
         )
+
+        old_total_norm = completed_standard.total_norm or 0
+
         for k, v in body.model_dump(exclude_none=True).items():
             setattr(completed_standard, k, v)
+
+        if body.count is not None or body.weight is not None:
+            standard = await uow.standard_repo.get_one(
+                dict(id=completed_standard.standard_id)
+            )
+            count = body.count if body.count is not None else completed_standard.count
+            weight = (
+                body.weight if body.weight is not None else completed_standard.weight
+            )
+
+            if weight:
+                user_weight = completed_standard.user_weight or 70
+                normalization = exercise_normalization.normalization(
+                    user_weight,
+                    weight,
+                    standard.name,
+                )
+                new_total_norm = normalization * count
+            else:
+                new_total_norm = (
+                    count / float(standard.count) if standard.count else count
+                )
+
+            completed_standard.total_norm = new_total_norm
+            norm_diff = new_total_norm - old_total_norm
+        else:
+            norm_diff = 0
+
         uow.completed_standard_repo.add(completed_standard)
 
         await uow.flush()
-        await uow.user_repo.update_total_liabilities(user_id)  # TODO events
-        # TODO update credit
+        await uow.user_repo.update_total_liabilities(user_id)
+        if norm_diff != 0:
+            try:
+                await uow.credit_repo.update_completed_count(user_id, int(norm_diff))
+            except NoResultFound:
+                pass
         await uow.commit()
         await uow.refresh(completed_standard)
 
@@ -199,10 +237,16 @@ async def delete_completed_standard(
             {"id": completed_standard_id, "user_id": user_id}
         )
         standard_id = completed_standard.standard_id
+        total_norm = completed_standard.total_norm or 0
+
         await uow.completed_standard_repo.delete(completed_standard_id)
         await uow.flush()
-        await uow.user_repo.update_total_liabilities(user_id)  # TODO events
-        # TODO update credit
+        await uow.user_repo.update_total_liabilities(user_id)
+        if total_norm != 0:
+            try:
+                await uow.credit_repo.update_completed_count(user_id, int(-total_norm))
+            except NoResultFound:
+                pass
         await uow.commit()
 
         # Проверяем и обновляем достижения

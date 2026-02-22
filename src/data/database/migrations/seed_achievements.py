@@ -480,6 +480,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "bench_press",
         "rarity": "common",
         "target_value": 1200,
+        "standard_id": "2fa2e1bf-4865-481a-a776-957accdeaafc",
     },
     {
         "id": IDS["bench_press_12000"],
@@ -489,6 +490,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "bench_press",
         "rarity": "rare",
         "target_value": 12000,
+        "standard_id": "2fa2e1bf-4865-481a-a776-957accdeaafc",
     },
     {
         "id": IDS["bench_press_120000"],
@@ -498,6 +500,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "bench_press",
         "rarity": "epic",
         "target_value": 120000,
+        "standard_id": "2fa2e1bf-4865-481a-a776-957accdeaafc",
     },
     # Приседания со штангой
     {
@@ -508,6 +511,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "weighted_squats",
         "rarity": "common",
         "target_value": 1600,
+        "standard_id": "e4003fee-6f98-4937-baf1-a6baf871dfe6",
     },
     {
         "id": IDS["weighted_squats_16000"],
@@ -517,6 +521,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "weighted_squats",
         "rarity": "rare",
         "target_value": 16000,
+        "standard_id": "e4003fee-6f98-4937-baf1-a6baf871dfe6",
     },
     {
         "id": IDS["weighted_squats_160000"],
@@ -526,6 +531,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "weighted_squats",
         "rarity": "epic",
         "target_value": 160000,
+        "standard_id": "e4003fee-6f98-4937-baf1-a6baf871dfe6",
     },
     # Становая тяга
     {
@@ -536,6 +542,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "deadlift",
         "rarity": "common",
         "target_value": 1800,
+        "standard_id": "2d3f349a-8e00-419f-a390-2d738b05fc1c",
     },
     {
         "id": IDS["deadlift_18000"],
@@ -545,6 +552,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "deadlift",
         "rarity": "rare",
         "target_value": 18000,
+        "standard_id": "2d3f349a-8e00-419f-a390-2d738b05fc1c",
     },
     {
         "id": IDS["deadlift_180000"],
@@ -554,6 +562,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "deadlift",
         "rarity": "epic",
         "target_value": 180000,
+        "standard_id": "2d3f349a-8e00-419f-a390-2d738b05fc1c",
     },
     # Подъём штанги на бицепс
     {
@@ -564,6 +573,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "biceps_curl",
         "rarity": "common",
         "target_value": 500,
+        "standard_id": "a7966ea4-b7a0-4bf3-85e2-96a93a5a9fc3",
     },
     {
         "id": IDS["biceps_curl_5000"],
@@ -573,6 +583,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "biceps_curl",
         "rarity": "rare",
         "target_value": 5000,
+        "standard_id": "a7966ea4-b7a0-4bf3-85e2-96a93a5a9fc3",
     },
     {
         "id": IDS["biceps_curl_50000"],
@@ -582,6 +593,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "biceps_curl",
         "rarity": "epic",
         "target_value": 50000,
+        "standard_id": "a7966ea4-b7a0-4bf3-85e2-96a93a5a9fc3",
     },
     # Подтягивания с весом
     {
@@ -592,6 +604,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "weighted_pullups",
         "rarity": "common",
         "target_value": 400,
+        "standard_id": "cafaf096-772b-45a0-9eee-20db378ae187",
     },
     {
         "id": IDS["weighted_pullups_4000"],
@@ -601,6 +614,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "weighted_pullups",
         "rarity": "rare",
         "target_value": 4000,
+        "standard_id": "cafaf096-772b-45a0-9eee-20db378ae187",
     },
     {
         "id": IDS["weighted_pullups_40000"],
@@ -610,6 +624,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "weighted_pullups",
         "rarity": "epic",
         "target_value": 40000,
+        "standard_id": "cafaf096-772b-45a0-9eee-20db378ae187",
     },
     # Отжимания на брусьях с весом
     {
@@ -620,6 +635,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "weighted_dips",
         "rarity": "common",
         "target_value": 800,
+        "standard_id": "c2494a4f-e2a7-43ac-aea9-e15d6792d134",
     },
     {
         "id": IDS["weighted_dips_8000"],
@@ -629,6 +645,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "weighted_dips",
         "rarity": "rare",
         "target_value": 8000,
+        "standard_id": "c2494a4f-e2a7-43ac-aea9-e15d6792d134",
     },
     {
         "id": IDS["weighted_dips_80000"],
@@ -638,6 +655,7 @@ WEIGHT_ACHIEVEMENTS = [
         "category": "weighted_dips",
         "rarity": "epic",
         "target_value": 80000,
+        "standard_id": "c2494a4f-e2a7-43ac-aea9-e15d6792d134",
     },
 ]
 
@@ -681,7 +699,7 @@ STREAK_ACHIEVEMENTS = [
     },
 ]
 
-# Мета-достижения
+# Мета-достижения  # TODO
 META_ACHIEVEMENTS = [
     {
         "id": IDS["meta_workout_expert"],

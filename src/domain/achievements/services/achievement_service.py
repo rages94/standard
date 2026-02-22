@@ -189,6 +189,24 @@ class AchievementService:
         self.uow.user_achievement_repo.add(user_achievement)
         return user_achievement
 
+    async def revoke_achievement(
+        self,
+        user_id: UUID,
+        achievement_id: UUID,
+    ) -> bool:
+        """Отозвать достижение у пользователя"""
+        deleted = await self.uow.user_achievement_repo.delete_by_user_and_achievement(
+            user_id, achievement_id
+        )
+        if deleted:
+            progress = await self.uow.user_achievement_progress_repo.get_or_none(
+                {"user_id": user_id, "achievement_id": achievement_id}
+            )
+            if progress:
+                progress.is_earned = False
+                self.uow.user_achievement_progress_repo.add(progress)
+        return deleted
+
     # ========== Управление серией дней ==========
 
     async def get_or_create_user_streak(self, user_id: UUID) -> UserStreak:
@@ -235,25 +253,25 @@ class AchievementService:
 
     # ========== Проверка и выдача достижений ==========
 
-    async def check_and_grant_single_achievement(
+    async def check_and_update_single_achievement(
         self,
         user_id: UUID,
         achievement: Achievement,
-    ) -> bool:
-        """Проверить и выдать одно достижение"""
-        # Проверяем, не получено ли уже
-        if await self.has_achievement(user_id, achievement.id):
-            return False
+    ) -> tuple[bool, bool]:
+        """Проверить, выдать или отозвать достижение
 
-        # Рассчитываем прогресс
+        Returns:
+            tuple[bool, bool]: (granted, revoked)
+        """
+        has_achievement = await self.has_achievement(user_id, achievement.id)
+
         current_value = await self.calculate_progress_for_achievement(
             user_id, achievement
         )
+        meets_condition = current_value >= achievement.target_value
 
-        # Проверяем условие
-        is_earned = current_value >= achievement.target_value
+        is_earned = meets_condition
 
-        # Обновляем прогресс
         await self.update_user_progress(
             user_id=user_id,
             achievement_id=achievement.id,
@@ -261,46 +279,68 @@ class AchievementService:
             is_earned=is_earned,
         )
 
-        # Если достигнуто - выдаём
-        if is_earned:
+        # STREAK ачивки не отзываются
+        if achievement.condition_type == ConditionType.STREAK:
+            if meets_condition and not has_achievement:
+                await self.grant_achievement_to_user(
+                    user_id=user_id,
+                    achievement_id=achievement.id,
+                    progress_value=current_value,
+                )
+                return (True, False)
+            return (False, False)
+
+        # COUNT/WEIGHT ачивки - полная логика
+        if meets_condition and not has_achievement:
             await self.grant_achievement_to_user(
                 user_id=user_id,
                 achievement_id=achievement.id,
                 progress_value=current_value,
             )
-            return True
+            return (True, False)
+        elif not meets_condition and has_achievement:
+            await self.revoke_achievement(user_id, achievement.id)
+            return (False, True)
 
-        return False
+        return (False, False)
 
-    async def check_meta_achievements(self, user_id: UUID) -> list[Achievement]:
-        """Проверить мета-достижения"""
-        new_achievements: list[Achievement] = []
+    async def check_meta_achievements(
+        self, user_id: UUID
+    ) -> tuple[list[Achievement], list[Achievement]]:
+        """Проверить мета-достижения - выдать или отозвать
 
-        # Получаем все полученные ачивки пользователя
+        Returns:
+            tuple[list[Achievement], list[Achievement]]: (granted, revoked)
+        """
+        granted: list[Achievement] = []
+        revoked: list[Achievement] = []
+
         earned_ids = await self.uow.user_achievement_repo.get_earned_achievement_ids(
             user_id
         )
 
-        # Получаем все мета-ачивки
         meta_achievements = await self.uow.achievement_repo.filter(
             {"condition_type": ConditionType.META}
         )
 
         for meta in meta_achievements:
-            # Пропускаем уже полученные
-            if meta.id in earned_ids:
-                continue
+            has_meta = meta.id in earned_ids
+            meets_condition = await self._check_meta_condition(meta, earned_ids)
 
-            # Проверяем условие мета-ачивки
-            if await self._check_meta_condition(meta, earned_ids):
+            if meets_condition and not has_meta:
                 await self.grant_achievement_to_user(
                     user_id=user_id,
                     achievement_id=meta.id,
                     progress_value=float(len(earned_ids)),
                 )
-                new_achievements.append(meta)
+                granted.append(meta)
+                earned_ids.add(meta.id)
+            elif not meets_condition and has_meta:
+                await self.revoke_achievement(user_id, meta.id)
+                revoked.append(meta)
+                earned_ids.discard(meta.id)
 
-        return new_achievements
+        return (granted, revoked)
 
     async def _check_meta_condition(
         self,
@@ -400,9 +440,14 @@ class AchievementService:
         user_id: UUID,
         standard_id: UUID | None = None,
         activity_date: date | None = None,
-    ) -> list[Achievement]:
-        """Проверить и обновить все достижения пользователя"""
-        new_achievements: list[Achievement] = []
+    ) -> tuple[list[Achievement], list[Achievement]]:
+        """Проверить, выдать или отозвать все достижения пользователя
+
+        Returns:
+            tuple[list[Achievement], list[Achievement]]: (granted, revoked)
+        """
+        granted: list[Achievement] = []
+        revoked: list[Achievement] = []
 
         # 1. Обновляем серию дней
         if activity_date:
@@ -419,22 +464,31 @@ class AchievementService:
             for achievement in achievements:
                 if achievement.standard_id and achievement.standard_id != standard_id:
                     continue
-                if await self.check_and_grant_single_achievement(user_id, achievement):
-                    new_achievements.append(achievement)
+                g, r = await self.check_and_update_single_achievement(
+                    user_id, achievement
+                )
+                if g:
+                    granted.append(achievement)
+                if r:
+                    revoked.append(achievement)
 
         # 3. Проверяем ачивки типа STREAK
         streak_achievements = await self.uow.achievement_repo.filter(
             {"condition_type": ConditionType.STREAK}
         )
         for achievement in streak_achievements:
-            if await self.check_and_grant_single_achievement(user_id, achievement):
-                new_achievements.append(achievement)
+            g, r = await self.check_and_update_single_achievement(user_id, achievement)
+            if g:
+                granted.append(achievement)
+            if r:
+                revoked.append(achievement)
 
         # 4. Проверяем мета-ачивки
-        meta_achievements = await self.check_meta_achievements(user_id)
-        new_achievements.extend(meta_achievements)
+        meta_granted, meta_revoked = await self.check_meta_achievements(user_id)
+        granted.extend(meta_granted)
+        revoked.extend(meta_revoked)
 
-        return new_achievements
+        return (granted, revoked)
 
     # ========== Получение данных ==========
 

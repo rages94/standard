@@ -1,66 +1,63 @@
-from enum import Enum
+from enum import StrEnum
 
 
-class RarityType(str, Enum):
+class RarityType(StrEnum):
     """Редкость достижения"""
 
-    COMMON = "common"  # 100
-    RARE = "rare"  # 1000
-    EPIC = "epic"  # 10000
-    LEGENDARY = "legendary"  # Особые
+    COMMON = "common"
+    RARE = "rare"
+    EPIC = "epic"
+    LEGENDARY = "legendary"
 
 
-class ConditionType(str, Enum):
+class ConditionType(StrEnum):
     """Тип условия для получения достижения"""
 
-    COUNT = "count"  # Количество повторений
-    WEIGHT = "weight"  # Суммарный вес (count * weight)
-    STREAK = "streak"  # Серия дней подряд
-    META = "meta"  # Получение других достижений
+    COUNT = "count"
+    WEIGHT = "weight"
+    STREAK = "streak"
+    META = "meta"
 
 
-class TimePeriod(str, Enum):
+class TimePeriod(StrEnum):
     """Период времени для подсчёта"""
 
-    TOTAL = "total"  # За всё время
-    DAILY = "daily"  # За день
-    MONTHLY = "monthly"  # За месяц
+    TOTAL = "total"
+    DAILY = "daily"
+    MONTHLY = "monthly"
 
 
-class MetaTier(str, Enum):
+class MetaTier(StrEnum):
     """Уровень мета-достижения (для явного определения вместо парсинга имени)"""
 
-    BEGINNER = "beginner"  # Начинающий (100 повторений/вес)
-    ATHLETE = "athlete"  # Спортсмен (1000 повторений/вес)
-    MASTER = "master"  # Мастер (10000 повторений/вес)
-    LEGEND = "legend"  # Легенда (все достижения)
+    BEGINNER = "beginner"
+    ATHLETE = "athlete"
+    MASTER = "master"
+    LEGEND = "legend"
 
 
-class AchievementCategory(str, Enum):
+class AchievementCategory(StrEnum):
     """Категории достижений по упражнениям"""
 
-    # Упражнения со своим весом
-    PUSHUPS = "pushups"  # Отжимания
-    PULLUPS = "pullups"  # Подтягивания
-    SQUATS = "squats"  # Приседания
-    CRUNCHES = "crunches"  # Скручивания
-    RUNNING = "running"  # Бег (км)
-    DIPS = "dips"  # Отжимания на брусьях
-    ABS = "abs"  # Пресс
-    ABS_DIPS = "abs_dips"  # Пресс на брусьях
-    JUMP_ROPE = "jump_rope"  # Скакалка
-    PLANK = "plank"  # Планка (мин)
-    BURPEES = "burpees"  # Бёрпи
-    CALVES = "calves"  # Икры (поднятия на носки)
+    PUSHUPS = "Отжимания"
+    PULLUPS = "Подтягивания"
+    SQUATS = "Приседания"
+    CRUNCHES = "Скручивания"
+    RUNNING = "Бег"
+    DIPS = "Отжимания на брусьях"
+    ABS = "Пресс"
+    ABS_DIPS = "Пресс на брусьях"
+    JUMP_ROPE = "Скакалка"
+    PLANK = "Планка"
+    BURPEES = "Бёрпи"
+    CALVES = "Поднятия на носки"
 
-    # Тяжёлая атлетика
-    BENCH_PRESS = "bench_press"  # Жим штанги лёжа
-    WEIGHTED_SQUATS = "weighted_squats"  # Приседание со штангой
-    DEADLIFT = "deadlift"  # Становая тяга
-    BICEPS_CURL = "biceps_curl"  # Подъём штанги на бицепс
-    WEIGHTED_PULLUPS = "weighted_pullups"  # Подтягивания с весом
-    WEIGHTED_DIPS = "weighted_dips"  # Отжимания на брусьях с весом
+    BENCH_PRESS = "Жим штанги лёжа"
+    WEIGHTED_SQUATS = "Приседания со штангой"
+    DEADLIFT = "Становая тяга"
+    BICEPS_CURL = "Подъём штанги на бицепс"
+    WEIGHTED_PULLUPS = "Подтягивания с отягощением"
+    WEIGHTED_DIPS = "Отжимания на брусьях с отягощением"
 
-    # Специальные категории
-    STREAK = "streak"  # Серии дней
-    META = "meta"  # Мета-достижения
+    STREAK = "Серии дней"
+    META = "Мета-достижения"

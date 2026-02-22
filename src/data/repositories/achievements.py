@@ -71,6 +71,18 @@ class UserAchievementRepository(
         result = await self.session.execute(query)
         return set(result.scalars().all())
 
+    async def delete_by_user_and_achievement(
+        self, user_id: UUID, achievement_id: UUID
+    ) -> bool:
+        """Удалить запись о полученном достижении"""
+        record = await self.get_or_none(
+            {"user_id": user_id, "achievement_id": achievement_id}
+        )
+        if record:
+            await self.session.delete(record)
+            return True
+        return False
+
 
 class UserAchievementProgressFilterSet(BaseFilterSet):
     id = Filter(UserAchievementProgress.id)
