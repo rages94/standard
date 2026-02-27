@@ -8,9 +8,8 @@ from src.domain.achievements.use_cases.get_user_streak import GetUserStreak
 from src.domain.achievements.use_cases.list import (
     ListAchievements,
 )
-from src.domain.achievements.use_cases.get_achievement_categories import GetAchievementCategories
 from src.domain.achievements.use_cases.list_by_category import (
-    ListAchievementsByCategory,
+    ListAchievementsByStandardId,
 )
 from src.domain.auth_link.use_cases.create import CreateAuthLink
 from src.domain.bot.handlers.create_completed_standard import (
@@ -183,8 +182,8 @@ class UseCasesContainer(containers.DeclarativeContainer):
 
     # achievements use cases
     list_achievements = providers.Factory(ListAchievements, uow=repositories.uow)
-    list_achievements_by_category = providers.Factory(
-        ListAchievementsByCategory, uow=repositories.uow
+    list_achievements_by_standard_id = providers.Factory(
+        ListAchievementsByStandardId, uow=repositories.uow
     )
     get_user_earned_achievements = providers.Factory(
         GetUserEarnedAchievements, uow=repositories.uow
@@ -193,4 +192,3 @@ class UseCasesContainer(containers.DeclarativeContainer):
     check_and_update_achievements = providers.Factory(
         CheckAndUpdateAchievements, uow=repositories.uow
     )
-    get_achievement_categories = providers.Factory(GetAchievementCategories)

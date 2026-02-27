@@ -4,26 +4,17 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from src.domain.achievements.dto.enums import (
-    AchievementCategory,
     ConditionType,
     RarityType,
     TimePeriod,
 )
 
 __all__ = [
-    "AchievementCategorySchema",
     "AchievementProgressSchema",
     "UserStreakSchema",
     "AchievementWithProgressSchema",
     "EarnedAchievementSchema",
 ]
-
-
-class AchievementCategorySchema(BaseModel):
-    """Схема категории достижения"""
-
-    value: str
-    label: str
 
 
 class AchievementProgressSchema(BaseModel):
@@ -33,7 +24,6 @@ class AchievementProgressSchema(BaseModel):
     name: str
     description: str
     icon: str | None
-    category: AchievementCategory
     rarity: RarityType
     condition_type: ConditionType
     target_value: float
@@ -52,7 +42,6 @@ class EarnedAchievementSchema(BaseModel):
     name: str
     description: str
     icon: str | None
-    category: AchievementCategory
     rarity: RarityType
     earned_at: datetime
     progress_at_earned: float

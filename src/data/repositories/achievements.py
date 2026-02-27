@@ -23,7 +23,6 @@ from src.data.models import (
 
 class AchievementFilterSet(BaseFilterSet):
     id = Filter(Achievement.id)
-    category = Filter(Achievement.category)
     condition_type = Filter(Achievement.condition_type)
     condition_types = InFilter(Achievement.condition_type)
     is_active = Filter(Achievement.is_active)

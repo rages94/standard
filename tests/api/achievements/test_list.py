@@ -1,8 +1,6 @@
 from httpx import AsyncClient
 
-from src.config import Settings
-
-settings = Settings()
+from src.data.models import Standard
 
 
 async def test_list_achievements(auth_client: AsyncClient):
@@ -11,14 +9,12 @@ async def test_list_achievements(auth_client: AsyncClient):
     assert response.status_code == 200
     json = response.json()
     assert isinstance(json, list)
-    # Проверяем структуру ответа
     if len(json) > 0:
         achievement = json[0]
         assert "id" in achievement
         assert "name" in achievement
         assert "description" in achievement
         assert "icon" in achievement
-        assert "category" in achievement
         assert "rarity" in achievement
         assert "target_value" in achievement
         assert "current_value" in achievement
@@ -26,21 +22,11 @@ async def test_list_achievements(auth_client: AsyncClient):
         assert "is_earned" in achievement
 
 
-async def test_list_achievement_categories(auth_client: AsyncClient):
-    """Тест получения списка категорий"""
-    response = await auth_client.get("/achievements/categories/")
-    assert response.status_code == 200
-    json = response.json()
-    assert isinstance(json, list)
-    if len(json) > 0:
-        category = json[0]
-        assert "value" in category
-        assert "label" in category
-
-
-async def test_list_achievements_by_category(auth_client: AsyncClient):
-    """Тест получения достижений по категории"""
-    response = await auth_client.get("/achievements/category/pushups/")
+async def test_list_achievements_by_standard_id(
+    auth_client: AsyncClient, standard: Standard
+):
+    """Тест получения достижений по standard_id"""
+    response = await auth_client.get(f"/achievements/standard/{standard.id}/")
     assert response.status_code == 200
     json = response.json()
     assert isinstance(json, list)

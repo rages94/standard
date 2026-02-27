@@ -6,7 +6,6 @@ from src.data.models.achievement import (
     AchievementUpdate,
 )
 from src.domain.achievements.dto.enums import (
-    AchievementCategory,
     ConditionType,
     RarityType,
 )
@@ -21,7 +20,6 @@ class AchievementCreateFactory(ModelFactory[AchievementCreate]):
     __check_model__ = False
     __allow_none_optionals__ = False
 
-    category = AchievementCategory.PUSHUPS
     condition_type = ConditionType.COUNT
     rarity = RarityType.COMMON
     target_value = 100

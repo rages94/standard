@@ -53,3 +53,7 @@ class CompletedStandardPublic(SQLModel):
     created_at: datetime
     standard: StandardPublic | None = None
     user_id: UUID
+
+
+class NormalizationCompletedStandardPublic(SQLModel):
+    total_norm: float

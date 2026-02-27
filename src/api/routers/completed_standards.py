@@ -12,6 +12,7 @@ from src.data.models import CompletedStandard
 from src.data.models.completed_standard import (
     CompletedStandardCreate,
     CompletedStandardUpdate,
+    NormalizationCompletedStandardPublic,
 )
 from src.data.uow import UnitOfWork
 from src.domain.achievements.use_cases.check_and_update import (
@@ -94,6 +95,40 @@ async def create_completed_standard(  # TODO check weightlifting(write tests)
             activity_date=datetime.now().date(),
         )
     return completed_standard
+
+
+@completed_standard_router.put(
+    "/normalization/",
+    status_code=201,
+)
+@inject
+async def normalization_completed_standard(
+    body: CompletedStandardCreate,
+    uow: UnitOfWork = Depends(Provide["repositories.uow"]),
+    exercise_normalization: ExerciseNormalizationService = Depends(
+        Provide["services.exercise_normalization"]
+    ),
+    credentials: JwtAuthorizationCredentials = Security(access_bearer),
+) -> NormalizationCompletedStandardPublic:
+    async with uow:
+        standard = await uow.standard_repo.get_one(dict(id=body.standard_id))
+        if body.weight:
+            normalization = exercise_normalization.normalization(
+                body.user_weight,
+                body.weight,
+                standard.name,
+                # user.sex,  # TODO get user
+            )
+            return NormalizationCompletedStandardPublic(
+                total_norm=normalization * body.count
+            )
+        return NormalizationCompletedStandardPublic(
+            total_norm=(
+                body.count
+                if not body.completed_type_is_count()
+                else body.count / float(standard.count)
+            )
+        )
 
 
 @completed_standard_router.get(

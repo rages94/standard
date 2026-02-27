@@ -14,7 +14,6 @@ from src.data.models import (
 from src.data.models.completed_standard import CompletedStandard
 from src.data.uow import UnitOfWork
 from src.domain.achievements.dto.enums import (
-    AchievementCategory,
     ConditionType,
     MetaTier,
     TimePeriod,
@@ -495,24 +494,30 @@ class AchievementService:
     async def get_user_progress_with_achievements(
         self,
         user_id: UUID,
-        category: str | None = None,
     ) -> list[AchievementProgressSchema]:
-        """Получить прогресс пользователя по всем достижениям"""
-        # Получаем все активные ачивки
-        if category:
-            achievements = await self.uow.achievement_repo.filter(
-                {"category": category}
-            )
-        else:
-            achievements = await self.uow.achievement_repo.filter({})
+        achievements = await self.uow.achievement_repo.filter({})
+        return await self._build_achievement_progress(user_id, achievements)
 
-        # Получаем прогресс пользователя
+    async def get_user_progress_with_achievements_by_standard(
+        self,
+        user_id: UUID,
+        standard_id: UUID,
+    ) -> list[AchievementProgressSchema]:
+        achievements = await self.uow.achievement_repo.filter(
+            {"standard_id": standard_id}
+        )
+        return await self._build_achievement_progress(user_id, achievements)
+
+    async def _build_achievement_progress(
+        self,
+        user_id: UUID,
+        achievements: list[Achievement],
+    ) -> list[AchievementProgressSchema]:
         progress_records = await self.uow.user_achievement_progress_repo.filter(
             {"user_id": user_id}
         )
         progress_map = {p.achievement_id: p for p in progress_records}
 
-        # Получаем полученные ачивки
         earned_records = await self.uow.user_achievement_repo.filter(
             {"user_id": user_id}
         )
@@ -531,7 +536,6 @@ class AchievementService:
                     name=achievement.name,
                     description=achievement.description,
                     icon=achievement.icon,
-                    category=achievement.category,
                     rarity=achievement.rarity,
                     condition_type=achievement.condition_type,
                     target_value=achievement.target_value,
@@ -565,7 +569,6 @@ class AchievementService:
                     name=record.achievement.name,
                     description=record.achievement.description,
                     icon=record.achievement.icon,
-                    category=record.achievement.category,
                     rarity=record.achievement.rarity,
                     earned_at=record.earned_at,
                     progress_at_earned=record.progress_at_earned,
@@ -586,8 +589,3 @@ class AchievementService:
             longest_streak=streak.longest_streak,
             last_activity_date=streak.last_activity_date,
         )
-
-    async def get_achievement_categories(self) -> list[dict]:
-        """Получить список всех категорий достижений"""
-
-        return [{"value": cat.value, "label": cat.name} for cat in AchievementCategory]

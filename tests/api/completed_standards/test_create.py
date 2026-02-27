@@ -38,7 +38,7 @@ async def test_create_completed_standard_basic(
     if completed_type == CompletedType.standard:
         assert json["total_norm"] == data.count
     else:
-        assert json["total_norm"] == float(standard.count) * data.count
+        assert json["total_norm"] == data.count / float(standard.count)
 
 
 async def test_create_standard_duplicate_name(
