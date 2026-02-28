@@ -85,9 +85,7 @@ def upgrade() -> None:
         ),
         sa.PrimaryKeyConstraint("id"),
     )
-    op.create_index(
-        op.f("ix_achievement_category"), "achievement", ["category"], unique=False
-    )
+
     op.create_index(
         op.f("ix_achievement_condition_type"),
         "achievement",
@@ -288,6 +286,5 @@ def downgrade() -> None:
     op.drop_table("user_streak")
     op.drop_index(op.f("ix_achievement_name"), table_name="achievement")
     op.drop_index(op.f("ix_achievement_condition_type"), table_name="achievement")
-    op.drop_index(op.f("ix_achievement_category"), table_name="achievement")
     op.drop_table("achievement")
     # ### end Alembic commands ###
