@@ -1,8 +1,9 @@
-from datetime import datetime
+from datetime import date, datetime
+from typing import Literal
 from uuid import UUID
 
 from dependency_injector.wiring import Provide, inject
-from fastapi import APIRouter, Depends, Security
+from fastapi import APIRouter, Depends, HTTPException, Security
 from fastapi.params import Query
 from fastapi_jwt import JwtAccessBearer, JwtAuthorizationCredentials, JwtRefreshBearer
 from sqlalchemy.exc import NoResultFound
@@ -56,15 +57,11 @@ async def create_completed_standard(  # TODO check weightlifting(write tests)
                 body.user_weight,
                 body.weight,
                 standard.name,
-                # user.sex,  # TODO get user
+                body.user_sex,
             )
             total_norm = normalization * body.count
         else:
-            total_norm = (
-                body.count
-                if not body.completed_type_is_count()
-                else body.count / float(standard.count)
-            )
+            total_norm = body.count / float(standard.count)
 
         completed_standard = CompletedStandard(
             standard_id=standard.id,
@@ -72,7 +69,6 @@ async def create_completed_standard(  # TODO check weightlifting(write tests)
             weight=body.weight,
             user_weight=body.user_weight,
             total_norm=total_norm,
-            completed_type=body.completed_type,
             user_id=user_id,
         )
 
@@ -117,17 +113,13 @@ async def normalization_completed_standard(
                 body.user_weight,
                 body.weight,
                 standard.name,
-                # user.sex,  # TODO get user
+                body.user_sex,
             )
             return NormalizationCompletedStandardPublic(
                 total_norm=normalization * body.count
             )
         return NormalizationCompletedStandardPublic(
-            total_norm=(
-                body.count
-                if not body.completed_type_is_count()
-                else body.count / float(standard.count)
-            )
+            total_norm=body.count / float(standard.count)
         )
 
 
@@ -155,13 +147,19 @@ async def list_completed_standards(
 )
 @inject
 async def list_grouped_completed_standards(
+    group_by: Literal["day", "week", "month"] = Query("day"),
+    start_date: date | None = Query(None),
+    end_date: date | None = Query(None),
     uow: UnitOfWork = Depends(Provide["repositories.uow"]),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
-    as_standard: bool = Query(False),
 ) -> GroupedCompletedStandard:
+    if start_date and end_date and end_date < start_date:
+        raise HTTPException(
+            status_code=400, detail="start_date не может быть позже end_date"
+        )
     async with uow:
         return await uow.completed_standard_repo.grouped_list(
-            UUID(credentials["id"]), as_standard
+            UUID(credentials["id"]), group_by, start_date, end_date
         )
 
 

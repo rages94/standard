@@ -13,18 +13,13 @@ from tests.factories.standards import StandardCreateFactory
 settings = Settings()
 
 
-@pytest.mark.parametrize(
-    "completed_type", [CompletedType.count, CompletedType.standard]
-)
 async def test_create_completed_standard_basic(
     auth_client: AsyncClient,
     standard: Standard,
-    completed_type: CompletedType,
 ):
     data = CompletedStandardCreateFactory.build(
         standard_id=standard.id,
         weight=None,
-        completed_type=completed_type,
     )
     response = await auth_client.post(
         "/completed_standards/", content=data.model_dump_json()
@@ -35,10 +30,7 @@ async def test_create_completed_standard_basic(
     assert json["count"] == data.count
     assert json["user_weight"] == data.user_weight
     assert json["weight"] is None
-    if completed_type == CompletedType.standard:
-        assert json["total_norm"] == data.count
-    else:
-        assert json["total_norm"] == data.count / float(standard.count)
+    assert json["total_norm"] == data.count / float(standard.count)
 
 
 async def test_create_standard_duplicate_name(

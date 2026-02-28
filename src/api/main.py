@@ -1,4 +1,5 @@
 import fastapi
+from authlib.jose.errors import BadSignatureError, ExpiredTokenError
 from sqlalchemy.exc import IntegrityError, NoResultFound
 from starlette.middleware.cors import CORSMiddleware
 
@@ -8,13 +9,12 @@ from src.common.handlers.alchemy import (
     jwt_error_handler,
     no_result_found_handler,
 )
-from authlib.jose.errors import BadSignatureError, ExpiredTokenError
 from src.containers.container import container
 
 
 def create_app() -> fastapi.FastAPI:
     origins = [
-        "*" # TODO add localhost
+        "*"  # TODO add localhost
     ]
     application = fastapi.FastAPI()
     application.add_middleware(

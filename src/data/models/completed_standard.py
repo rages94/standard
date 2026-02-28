@@ -6,6 +6,7 @@ from sqlmodel import Field, Relationship, SQLModel
 
 from src.common.models.mixins import TimestampMixin
 from src.data.models.standard import StandardPublic
+from src.domain.math.dto.enums import SexEnum
 from src.domain.user.dto.enums import CompletedType
 
 if TYPE_CHECKING:
@@ -32,10 +33,7 @@ class CompletedStandardCreate(SQLModel):
     weight: float | None = None
     user_weight: float | None = None
     total_norm: float | None = None
-    completed_type: CompletedType
-
-    def completed_type_is_count(self) -> bool:
-        return self.completed_type == CompletedType.count
+    user_sex: SexEnum | None = None
 
 
 class CompletedStandardUpdate(SQLModel):

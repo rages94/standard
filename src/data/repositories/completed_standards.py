@@ -1,6 +1,6 @@
 import operator as op
 from collections import defaultdict
-from datetime import timedelta
+from datetime import date, timedelta
 from uuid import UUID
 
 from sqlalchemy import Date, func, select
@@ -54,12 +54,15 @@ class CompletedStandardRepository(
     async def grouped_list(
         self,
         user_id: UUID,
-        as_standard: bool = False,  # TODO rm as_standard
+        group_by: str = "day",
+        start_date: date | None = None,
+        end_date: date | None = None,
     ) -> GroupedCompletedStandard:
+        date_trunc_value = group_by if group_by in ("day", "week", "month") else "day"
         query = (
             select(
                 Standard.name,
-                func.date_trunc("day", CompletedStandard.created_at)
+                func.date_trunc(date_trunc_value, CompletedStandard.created_at)
                 .cast(Date)
                 .label("date_created"),
                 func.sum(CompletedStandard.total_norm),
@@ -72,13 +75,17 @@ class CompletedStandardRepository(
             .where(CompletedStandard.user_id == user_id)
             .order_by("date_created")
         )
+        if start_date:
+            query = query.where(CompletedStandard.created_at >= start_date)
+        if end_date:
+            query = query.where(CompletedStandard.created_at <= end_date)
         results = (await self.session.execute(query)).all()
         data = defaultdict(dict)
         names = set()
         for name, date_created, total_norm in results:
             names.add(name)
             data[date_created][name] = total_norm
-        result = GroupedCompletedStandard(labels=data.keys(), datasets=[])
+        result = GroupedCompletedStandard(labels=list(data.keys()), datasets=[])
         for name in names:
             values = []
             for date_created, v in data.items():
