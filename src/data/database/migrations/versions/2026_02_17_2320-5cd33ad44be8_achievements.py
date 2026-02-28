@@ -51,11 +51,6 @@ def upgrade() -> None:
         sa.Column("description", sqlmodel.sql.sqltypes.AutoString(), nullable=False),
         sa.Column("icon", sqlmodel.sql.sqltypes.AutoString(), nullable=True),
         sa.Column(
-            "category",
-            sqlmodel.sql.sqltypes.AutoString(),
-            nullable=False,
-        ),
-        sa.Column(
             "rarity",
             sqlmodel.sql.sqltypes.AutoString(),
             nullable=False,
