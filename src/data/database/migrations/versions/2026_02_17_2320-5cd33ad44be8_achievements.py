@@ -227,7 +227,6 @@ def _populate_achievements():
                     "name": ach["name"],
                     "description": ach["description"],
                     "icon": ach["icon"],
-                    "category": ach["category"],
                     "rarity": ach["rarity"],
                     "condition_type": condition_type,
                     "standard_id": ach.get("standard_id"),
