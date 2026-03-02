@@ -78,7 +78,9 @@ class CompletedStandardRepository(
         if start_date:
             query = query.where(CompletedStandard.created_at >= start_date)
         if end_date:
-            query = query.where(CompletedStandard.created_at <= end_date)
+            query = query.where(
+                CompletedStandard.created_at <= end_date + timedelta(days=1)
+            )
         results = (await self.session.execute(query)).all()
         data = defaultdict(dict)
         names = set()
