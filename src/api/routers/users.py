@@ -12,6 +12,8 @@ from src.domain.auth_link.dto.filters import AuthLinkFilterSchema
 from src.domain.bot.use_cases.send_message import BotSendMessage
 from src.domain.jwt.dto.output import JwtResponse
 from src.domain.user.dto.filters import UserFilterSchema
+from src.domain.user.dto.output import DashboardResponse
+from src.domain.user.use_cases.get_dashboard import GetDashboard
 
 settings = Settings()
 user_router = APIRouter()
@@ -130,3 +132,12 @@ async def update_user(
         )
         await uow.commit()
         return await uow.user_repo.get_one(dict(id=credentials["id"]))
+
+
+@user_router.get("/dashboard/")
+@inject
+async def get_user_dashboard(
+    credentials: JwtAuthorizationCredentials = Security(access_bearer),
+    get_dashboard: GetDashboard = Depends(Provide["use_cases.get_dashboard"]),
+) -> DashboardResponse:
+    return await get_dashboard(credentials["id"])

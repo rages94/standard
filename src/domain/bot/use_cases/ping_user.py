@@ -1,8 +1,8 @@
 from asyncio import gather
 from datetime import timedelta
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
-from src.common.models.mixins import utcnow
 from src.domain.bot.use_cases.send_message import BotSendMessage
 from src.domain.completed_standards.dto.filter import CompletedStandardFilterSchema
 from src.domain.completed_standards.use_cases.list import ListCompletedStandards
@@ -26,21 +26,34 @@ class PingUser:
         self.config = config
 
     async def __call__(self, user_id: UUID, chat_id: int) -> None:
+        from datetime import datetime
+
+        now = datetime.now(ZoneInfo("Europe/Moscow"))
         params = CompletedStandardFilterSchema(
             user_id=user_id,
-            created_at_gte=utcnow().date() - timedelta(days=3),
+            created_at_gte=now.date() - timedelta(days=3),
         )
         completed_standards, active_credit = await gather(
             self.list_completed_standards(params),
             self.get_active_credit(user_id),
         )
-        credit_data = active_credit.count - active_credit.completed_count if active_credit else 'Нет зачета'
-        completed_standards_data = ' '.join(
-            f'{c_standard.created_at} - {c_standard.count} {c_standard.standard.name}' for c_standard in completed_standards
-        ).strip() or 'Нет данных'
-        prompt = self.config['llm_model']['activity_prompt'] % (completed_standards_data, credit_data)
+        credit_data = (
+            active_credit.count - active_credit.completed_count
+            if active_credit
+            else "Нет зачета"
+        )
+        completed_standards_data = (
+            " ".join(
+                f"{c_standard.created_at} - {c_standard.count} {c_standard.standard.name}"
+                for c_standard in completed_standards
+            ).strip()
+            or "Нет данных"
+        )
+        prompt = self.config["llm_model"]["activity_prompt"] % (
+            completed_standards_data,
+            credit_data,
+        )
         llm_response = await self.llm_generate(
-            model_name=self.config['llm_model']['name'],
-            prompt=prompt
+            model_name=self.config["llm_model"]["name"], prompt=prompt
         )
         await self.bot_send_message(llm_response, chat_id)

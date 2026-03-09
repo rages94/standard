@@ -1,8 +1,10 @@
 import operator as op
 from collections import defaultdict
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
+from dateutil.relativedelta import relativedelta
 from sqlalchemy import Date, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
@@ -111,7 +113,7 @@ class CompletedStandardRepository(
                 User.username,
                 Standard.name,
             )
-            .where(Standard.is_deleted == False)  # type: ignore
+            .where(not Standard.is_deleted)  # type: ignore
             .order_by(func.sum(CompletedStandard.total_norm).desc())
         )
         if days:
@@ -142,3 +144,44 @@ class CompletedStandardRepository(
             )
             for standard_name, ratings in data.items()
         ]
+
+    async def get_today_norm(self, user_id: UUID) -> float:
+        now = datetime.now(ZoneInfo("Europe/Moscow"))
+        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        today_end = (now + timedelta(days=1)).replace(
+            hour=0, minute=0, second=0, microsecond=0
+        )
+        query = (
+            select(func.sum(CompletedStandard.total_norm))
+            .where(CompletedStandard.user_id == user_id)
+            .where(CompletedStandard.created_at >= today_start)
+            .where(CompletedStandard.created_at < today_end)
+        )
+        result = await self.session.execute(query)
+        return float(result.scalar() or 0)
+
+    async def get_month_norm(self, user_id: UUID) -> float:
+        now = datetime.now(ZoneInfo("Europe/Moscow"))
+        month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        month_end = month_start + relativedelta(months=1)
+        query = (
+            select(func.sum(CompletedStandard.total_norm))
+            .where(CompletedStandard.user_id == user_id)
+            .where(CompletedStandard.created_at >= month_start)
+            .where(CompletedStandard.created_at < month_end)
+        )
+        result = await self.session.execute(query)
+        return float(result.scalar() or 0)
+
+    async def get_recent(
+        self, user_id: UUID, limit: int = 5
+    ) -> list[CompletedStandard]:
+        query = (
+            select(CompletedStandard)
+            .options(joinedload(CompletedStandard.standard))
+            .where(CompletedStandard.user_id == user_id)
+            .order_by(CompletedStandard.created_at.desc())
+            .limit(limit)
+        )
+        result = await self.session.execute(query)
+        return list(result.scalars().unique().all())

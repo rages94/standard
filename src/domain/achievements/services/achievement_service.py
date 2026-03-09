@@ -1,7 +1,8 @@
 """Сервис для работы с достижениями - единая точка входа для всей логики"""
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from uuid import UUID
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import func, select
 
@@ -52,12 +53,17 @@ class AchievementService:
         )
 
         if time_period == TimePeriod.DAILY:
-            today = datetime.now().date()
-            query = query.where(func.date(CompletedStandard.created_at) == today)
+            now = datetime.now(ZoneInfo("Europe/Moscow"))
+            today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            today_end = (now + timedelta(days=1)).replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
+            query = query.where(CompletedStandard.created_at >= today_start)
+            query = query.where(CompletedStandard.created_at < today_end)
         elif time_period == TimePeriod.MONTHLY:
-            today = datetime.now().date()
-            first_day = today.replace(day=1)
-            query = query.where(func.date(CompletedStandard.created_at) >= first_day)
+            now = datetime.now(ZoneInfo("Europe/Moscow"))
+            month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            query = query.where(CompletedStandard.created_at >= month_start)
 
         result = await self.uow.user_achievement_progress_repo.session.execute(query)
         total = result.scalar()
@@ -79,12 +85,17 @@ class AchievementService:
         )
 
         if time_period == TimePeriod.DAILY:
-            today = datetime.now().date()
-            query = query.where(func.date(CompletedStandard.created_at) == today)
+            now = datetime.now(ZoneInfo("Europe/Moscow"))
+            today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
+            today_end = (now + timedelta(days=1)).replace(
+                hour=0, minute=0, second=0, microsecond=0
+            )
+            query = query.where(CompletedStandard.created_at >= today_start)
+            query = query.where(CompletedStandard.created_at < today_end)
         elif time_period == TimePeriod.MONTHLY:
-            today = datetime.now().date()
-            first_day = today.replace(day=1)
-            query = query.where(func.date(CompletedStandard.created_at) >= first_day)
+            now = datetime.now(ZoneInfo("Europe/Moscow"))
+            month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            query = query.where(CompletedStandard.created_at >= month_start)
 
         result = await self.uow.user_achievement_progress_repo.session.execute(query)
         total = result.scalar()
@@ -101,7 +112,7 @@ class AchievementService:
         if streak.last_activity_date:
             today = datetime.now().date()
             delta = (today - streak.last_activity_date).days
-            if delta > 1:
+            if delta > 3:
                 # Серия прервалась
                 return 0
 
@@ -237,14 +248,14 @@ class AchievementService:
             if delta == 0:
                 # Уже учтена сегодняшняя активность
                 pass
-            elif delta == 1:
-                # Продолжаем серию
-                streak.current_streak += 1
+            elif delta <= 3:
+                # Продолжаем серию (тренировка в течение 3 дней)
+                streak.current_streak += delta
                 streak.last_activity_date = activity_date
                 if streak.current_streak > streak.longest_streak:
                     streak.longest_streak = streak.current_streak
             else:
-                # Серия прервалась
+                # Серия прервалась (>3 дней без активности)
                 streak.current_streak = 1
                 streak.last_activity_date = activity_date
 

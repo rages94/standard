@@ -51,6 +51,7 @@ from src.domain.rating.use_cases.get_rating_from_text import GetRatingFromText
 from src.domain.standards.use_cases.match import MatchStandards
 from src.domain.user.use_cases.check_auth_chat import AuthChatManager
 from src.domain.user.use_cases.get import GetUser
+from src.domain.user.use_cases.get_dashboard import GetDashboard
 from src.domain.user.use_cases.list import ListUsers
 
 
@@ -132,6 +133,7 @@ class UseCasesContainer(containers.DeclarativeContainer):
     )
 
     get_user = providers.Factory(GetUser, uow=repositories.uow)
+    get_dashboard = providers.Factory(GetDashboard, uow=repositories.uow)
     list_users = providers.Factory(ListUsers, uow=repositories.uow)
 
     create_message = providers.Factory(CreateMessage, uow=repositories.uow)

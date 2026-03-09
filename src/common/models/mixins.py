@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 from sqlalchemy import func
 from sqlmodel import DateTime, Field
@@ -6,6 +7,10 @@ from sqlmodel import DateTime, Field
 
 def utcnow():
     return datetime.now(timezone.utc)
+
+
+def moscow_now() -> datetime:
+    return datetime.now(ZoneInfo("Europe/Moscow"))
 
 
 class TimestampMixin:
