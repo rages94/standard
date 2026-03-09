@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import case, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload
 from sqlalchemy_filterset import (
@@ -99,6 +99,44 @@ class UserAchievementProgressRepository(
     list_query = select(UserAchievementProgress).options(
         joinedload(UserAchievementProgress.achievement)
     )
+
+    async def get_nearest_achievement(
+        self, user_id: UUID
+    ) -> UserAchievementProgress | None:
+        """Получить ближайшее недостигнутое достижение.
+
+        Фильтр: is_earned=False, time_period='total'
+        Сортировка по: (target_value - current_value) / (target_value / COEF)
+        где COEF = 100 для common, 1000 для rare, 10000 для epic
+        """
+        coef_case = case(
+            (Achievement.rarity == "common", 100),
+            (Achievement.rarity == "rare", 1000),
+            (Achievement.rarity == "epic", 10000),
+            else_=100,
+        )
+
+        amount = (Achievement.target_value - UserAchievementProgress.current_value) / (
+            Achievement.target_value / coef_case
+        )
+
+        query = (
+            select(UserAchievementProgress)
+            .join(Achievement, UserAchievementProgress.achievement_id == Achievement.id)
+            .where(
+                UserAchievementProgress.user_id == user_id,
+                UserAchievementProgress.is_earned == False,  # noqa: E712
+                Achievement.time_period == "total",
+                Achievement.is_active == True,  # noqa: E712
+                Achievement.is_meta_group == False,  # noqa: E712
+            )
+            .order_by(amount.asc())
+            .options(joinedload(UserAchievementProgress.achievement))
+            .limit(1)
+        )
+
+        result = await self.session.execute(query)
+        return result.scalar_one_or_none()
 
 
 class UserStreakFilterSet(BaseFilterSet):

@@ -53,8 +53,8 @@ class AchievementPublic(SQLModel):
     rarity: RarityType
     condition_type: ConditionType
     target_value: float
-    time_period: TimePeriod | None
-    meta_tier: MetaTier | None
+    time_period: TimePeriod | None = None
+    meta_tier: MetaTier | None = None
     is_meta_group: bool
     is_active: bool
 

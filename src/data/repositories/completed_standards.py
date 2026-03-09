@@ -1,6 +1,6 @@
 import operator as op
 from collections import defaultdict
-from datetime import date, timedelta, datetime
+from datetime import date, datetime, timedelta
 from uuid import UUID
 from zoneinfo import ZoneInfo
 
@@ -113,7 +113,7 @@ class CompletedStandardRepository(
                 User.username,
                 Standard.name,
             )
-            .where(not Standard.is_deleted)  # type: ignore
+            .where(Standard.is_deleted == False)  # type: ignore
             .order_by(func.sum(CompletedStandard.total_norm).desc())
         )
         if days:

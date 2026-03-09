@@ -22,6 +22,7 @@ pytest_plugins = [
     "tests.fixtures.users",
     "tests.fixtures.liability_templates",
     "tests.fixtures.liabilities",
+    "tests.fixtures.user_achievement_progress",
 ]
 
 if sys.platform.startswith("win"):

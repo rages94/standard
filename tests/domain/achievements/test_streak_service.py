@@ -1,6 +1,6 @@
 """Тесты для сервиса достижений - тестирование логики стриков"""
 
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from uuid import UUID
 
 import pytest
@@ -147,7 +147,7 @@ class TestCalculateStreakProgress:
     ) -> None:
         """Возвращает текущий стрик если активность была <= 3 дней назад"""
         uow = _container.repositories.uow()
-        today = date(2026, 3, 4)
+        today = datetime.now().date()
 
         async with uow:
             streak = UserStreak(
