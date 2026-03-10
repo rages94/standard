@@ -20,7 +20,7 @@ class GetDashboard:
             )
             streak = await self.uow.user_streak_repo.get_or_none(dict(user_id=user_id))
             today_norm = await self.uow.completed_standard_repo.get_today_norm(user_id)
-            month_norm = await self.uow.completed_standard_repo.get_month_norm(user_id)
+            week_norm = await self.uow.completed_standard_repo.get_week_norm(user_id)
             nearest_achievement = (
                 await self.uow.user_achievement_progress_repo.get_nearest_achievement(
                     user_id
@@ -32,6 +32,6 @@ class GetDashboard:
             current_credit=current_credit,
             streak=streak,
             today_norm=today_norm,
-            month_norm=month_norm,
+            week_norm=week_norm,
             nearest_achievement=nearest_achievement,
         )

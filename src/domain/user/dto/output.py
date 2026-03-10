@@ -14,5 +14,5 @@ class DashboardResponse(SQLModel):
     current_credit: CreditPublic | None
     streak: UserStreakPublic | None
     today_norm: float
-    month_norm: float
+    week_norm: float
     nearest_achievement: UserAchievementProgressWithAchievement | None = None

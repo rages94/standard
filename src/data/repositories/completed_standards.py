@@ -16,7 +16,7 @@ from sqlalchemy_filterset import (
     OrderingFilter,
 )
 
-from src.common.models.mixins import utcnow
+from src.common.models.mixins import moscow_now, utcnow
 from src.common.repository.base import Repository
 from src.data.models import CompletedStandard, Standard, User
 from src.domain.completed_standards.dto.output import (
@@ -146,7 +146,7 @@ class CompletedStandardRepository(
         ]
 
     async def get_today_norm(self, user_id: UUID) -> float:
-        now = datetime.now(ZoneInfo("Europe/Moscow"))
+        now = moscow_now()
         today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
         today_end = (now + timedelta(days=1)).replace(
             hour=0, minute=0, second=0, microsecond=0
@@ -160,28 +160,16 @@ class CompletedStandardRepository(
         result = await self.session.execute(query)
         return float(result.scalar() or 0)
 
-    async def get_month_norm(self, user_id: UUID) -> float:
-        now = datetime.now(ZoneInfo("Europe/Moscow"))
-        month_start = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        month_end = month_start + relativedelta(months=1)
+    async def get_week_norm(self, user_id: UUID) -> float:
+        now = moscow_now()
+        week_start = now - timedelta(days=now.weekday())
+        week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
+        week_end = week_start + timedelta(days=7)
         query = (
             select(func.sum(CompletedStandard.total_norm))
             .where(CompletedStandard.user_id == user_id)
-            .where(CompletedStandard.created_at >= month_start)
-            .where(CompletedStandard.created_at < month_end)
+            .where(CompletedStandard.created_at >= week_start)
+            .where(CompletedStandard.created_at < week_end)
         )
         result = await self.session.execute(query)
         return float(result.scalar() or 0)
-
-    async def get_recent(
-        self, user_id: UUID, limit: int = 5
-    ) -> list[CompletedStandard]:
-        query = (
-            select(CompletedStandard)
-            .options(joinedload(CompletedStandard.standard))
-            .where(CompletedStandard.user_id == user_id)
-            .order_by(CompletedStandard.created_at.desc())
-            .limit(limit)
-        )
-        result = await self.session.execute(query)
-        return list(result.scalars().unique().all())
