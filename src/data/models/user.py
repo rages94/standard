@@ -39,8 +39,12 @@ class User(TimestampMixin, SQLModel, table=True):
     total_liabilities: float | None = Field(default=0, nullable=True)
     telegram_chat_id: int | None = Field(nullable=True, index=True)
     completed_type: str | None = Field(CompletedType.count.value, nullable=True)
-    max_daily_norm: float = Field(default=0, nullable=False)
-    max_weekly_norm: float = Field(default=0, nullable=False)
+    max_daily_norm: float = Field(
+        default=0, nullable=False, sa_column_kwargs={"server_default": "0"}
+    )
+    max_weekly_norm: float = Field(
+        default=0, nullable=False, sa_column_kwargs={"server_default": "0"}
+    )
 
     completed_standards: list["CompletedStandard"] = Relationship(back_populates="user")
     liabilities: list["Liability"] = Relationship(back_populates="user")

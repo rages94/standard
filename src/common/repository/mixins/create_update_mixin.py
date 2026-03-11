@@ -25,6 +25,11 @@ class CreateUpdateMixin[ModelType](BaseRepositoryI):
         if result.rowcount != 1:
             raise NoResultFound
 
+    async def update_model(self, obj: ModelType) -> ModelType:
+        self.session.add(obj)
+        await self.session.refresh(obj)
+        return obj
+
     async def _get_object(self, id: IdType) -> ModelType:
         query = (
             self.get_query()
