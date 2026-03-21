@@ -36,18 +36,20 @@ class BaseNormalization:
         return np.power(x, p) + h
 
     @classmethod
-    def wilks_2020_func(cls, body_weight: float, lift_weight: float, sex: SexEnum) -> float:
+    def wilks_2020_func(
+        cls, body_weight: float, lift_weight: float, sex: SexEnum
+    ) -> float:
         sex = sex.lower()
         if sex not in cls.wilks_2020_coeffs:
             raise ValueError("sex must be 'male' or 'female'")
         c = cls.wilks_2020_coeffs[sex]
         denom = (
-                c["a"]
-                + c["b"] * body_weight
-                + c["c"] * (body_weight ** 2)
-                + c["d"] * (body_weight ** 3)
-                + c["e"] * (body_weight ** 4)
-                + c["f"] * (body_weight ** 5)
+            c["a"]
+            + c["b"] * body_weight
+            + c["c"] * (body_weight**2)
+            + c["d"] * (body_weight**3)
+            + c["e"] * (body_weight**4)
+            + c["f"] * (body_weight**5)
         )
         return 500 * lift_weight / denom
 
@@ -60,28 +62,22 @@ class BaseNormalization:
 class ExerciseNormalizationService(BaseNormalization):
     exercise_calibration_map: dict[ExerciseEnum, CoordinateCalibration] = {
         ExerciseEnum.bench_press: CoordinateCalibration(
-            xs=[110, 96, 84, 75, 68, 59, 0],
-            ys=[25, 17, 13, 10, 8, 5, 0]
+            xs=[110, 96, 84, 75, 68, 59, 0], ys=[25, 17, 13, 10, 8, 5, 0]
         ),
         ExerciseEnum.deadlift: CoordinateCalibration(
-            xs=[169, 148, 130, 114, 105, 91, 0],
-            ys=[25, 17, 13, 10, 8, 5, 0]
+            xs=[169, 148, 130, 114, 105, 91, 0], ys=[37.5, 25.5, 19.5, 15, 12, 7.5, 0]
         ),
         ExerciseEnum.squats: CoordinateCalibration(
-            xs=[158.5, 137, 119, 103, 94.5, 80, 0],
-            ys=[25, 17, 13, 10, 8, 5, 0.23]
+            xs=[158.5, 137, 119, 103, 94.5, 80, 0], ys=[25, 17, 13, 10, 8, 5, 0.23]
         ),
         ExerciseEnum.biceps_curl: CoordinateCalibration(
-            xs=[51.5, 44.5, 39, 34, 28.5, 25, 0],
-            ys=[25, 17, 13, 10, 8, 5, 0]
+            xs=[51.5, 44.5, 39, 34, 28.5, 25, 0], ys=[12.5, 8.5, 6.5, 5, 4, 2.5, 0]
         ),
         ExerciseEnum.dips_on_bars: CoordinateCalibration(
-            xs=[80, 67.5, 59, 51.5, 44.5, 39, 0],
-            ys=[25, 17, 13, 10, 8, 5, 0.5]
+            xs=[80, 67.5, 59, 51.5, 44.5, 39, 0], ys=[25, 17, 13, 10, 8, 5, 0.5]
         ),
         ExerciseEnum.pull_ups: CoordinateCalibration(
-            xs=[55, 48, 43, 37.5, 30, 26.5, 0],
-            ys=[23, 20, 17, 14, 11, 7, 1.2]
+            xs=[55, 48, 43, 37.5, 30, 26.5, 0], ys=[23, 20, 17, 14, 11, 7, 1.2]
         ),
     }
 
