@@ -12,6 +12,7 @@ from src.config import Settings
 from src.data.models import CompletedStandard
 from src.data.models.completed_standard import (
     CompletedStandardCreate,
+    CompletedStandardPublic,
     CompletedStandardUpdate,
     NormalizationCompletedStandardPublic,
 )
@@ -21,8 +22,10 @@ from src.domain.achievements.use_cases.check_and_update import (
 )
 from src.domain.completed_standards.dto.output import (
     CompletedStandardListResponse,
+    CompletedStandardWithAchievements,
     GroupedCompletedStandard,
     RatingGroupedCompletedStandard,
+    achievements_to_progress_schemas,
 )
 from src.domain.math.services.normalization import ExerciseNormalizationService
 
@@ -47,8 +50,10 @@ async def create_completed_standard(  # TODO check weightlifting(write tests)
         Provide["use_cases.check_and_update_achievements"]
     ),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
-) -> CompletedStandard:
+) -> CompletedStandardWithAchievements:
     user_id = credentials["id"]
+    granted: list = []
+
     async with uow:  # TODO use_case
         standard = await uow.standard_repo.get_one(dict(id=body.standard_id))
 
@@ -84,13 +89,20 @@ async def create_completed_standard(  # TODO check weightlifting(write tests)
         await uow.refresh(completed_standard)
         await uow.refresh(standard)
 
-        # Проверяем и обновляем достижения
-        await check_and_update_achievements(
-            user_id=user_id,
-            standard_id=standard.id,
-            activity_date=datetime.now().date(),
-        )
-    return completed_standard
+        # Сериализуем внутри блока, пока сессия активна
+        cs_public = CompletedStandardPublic.model_validate(completed_standard)
+
+    # Проверяем и обновляем достижения (отдельная транзакция)
+    granted, _ = await check_and_update_achievements(
+        user_id=user_id,
+        standard_id=standard.id,
+        activity_date=datetime.now().date(),
+    )
+
+    return CompletedStandardWithAchievements(
+        completed_standard=cs_public,
+        new_achievements=achievements_to_progress_schemas(granted),
+    )
 
 
 @completed_standard_router.put(
@@ -191,7 +203,7 @@ async def update_completed_standard(
         Provide["use_cases.check_and_update_achievements"]
     ),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
-) -> CompletedStandard:
+) -> CompletedStandardWithAchievements:
     user_id = credentials["id"]
     async with uow:
         completed_standard = await uow.completed_standard_repo.get_one(
@@ -242,13 +254,20 @@ async def update_completed_standard(
         await uow.commit()
         await uow.refresh(completed_standard)
 
-        # Проверяем и обновляем достижения
-        await check_and_update_achievements(
-            user_id=user_id,
-            standard_id=completed_standard.standard_id,
-            activity_date=datetime.now().date(),
-        )
-    return completed_standard
+        # Сериализуем внутри блока, пока сессия активна
+        cs_public = CompletedStandardPublic.model_validate(completed_standard)
+
+    # Проверяем и обновляем достижения (отдельная транзакция)
+    granted, _ = await check_and_update_achievements(
+        user_id=user_id,
+        standard_id=completed_standard.standard_id,
+        activity_date=datetime.now().date(),
+    )
+
+    return CompletedStandardWithAchievements(
+        completed_standard=cs_public,
+        new_achievements=achievements_to_progress_schemas(granted),
+    )
 
 
 @completed_standard_router.delete(

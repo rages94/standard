@@ -1,4 +1,3 @@
-
 from httpx import AsyncClient
 
 from src.data.models.completed_standard import (
@@ -19,7 +18,10 @@ async def test_update_completed_standard(
     )
     assert response.status_code == 200
     json = response.json()
-    assert json["count"] == new_count
+    assert "completed_standard" in json
+    assert "new_achievements" in json
+    assert json["completed_standard"]["count"] == new_count
+    assert isinstance(json["new_achievements"], list)
 
 
 async def test_update_completed_standard_not_owned(

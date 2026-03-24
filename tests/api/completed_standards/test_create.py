@@ -26,11 +26,15 @@ async def test_create_completed_standard_basic(
     )
     assert response.status_code == 201
     json = response.json()
-    assert json["standard_id"] == str(standard.id)
-    assert json["count"] == data.count
-    assert json["user_weight"] == data.user_weight
-    assert json["weight"] is None
-    assert json["total_norm"] == data.count / float(standard.count)
+    assert "completed_standard" in json
+    assert "new_achievements" in json
+    cs = json["completed_standard"]
+    assert cs["standard"]["id"] == str(standard.id)
+    assert cs["count"] == data.count
+    assert cs["user_weight"] == data.user_weight
+    assert cs["weight"] is None
+    assert cs["total_norm"] == data.count / float(standard.count)
+    assert isinstance(json["new_achievements"], list)
 
 
 async def test_create_standard_duplicate_name(
@@ -64,7 +68,8 @@ async def test_create_completed_standard_with_weight_and_normalization(
     )
     assert response.status_code == 201
     json = response.json()
-    assert json["total_norm"] == normalization_count * data.count
+    assert json["completed_standard"]["total_norm"] == normalization_count * data.count
+    assert isinstance(json["new_achievements"], list)
 
 
 async def test_create_completed_standard_missing_standard(auth_client: AsyncClient):
