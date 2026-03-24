@@ -22,6 +22,7 @@ class UserAchievement(SQLModel, TimestampMixin, table=True):
     progress_at_earned: float = Field(
         default=0
     )  # Значение прогресса на момент получения
+    is_viewed: bool = Field(default=False)
 
     # Отношения
     user: "User" = Relationship(back_populates="achievements")
@@ -57,6 +58,7 @@ class UserAchievementPublic(SQLModel):
     achievement_id: UUID
     earned_at: datetime
     progress_at_earned: float
+    is_viewed: bool
 
 
 class UserAchievementProgressPublic(SQLModel):

@@ -534,12 +534,18 @@ class AchievementService:
         )
         earned_map = {e.achievement_id: e for e in earned_records}
 
+        unviewed: list[UserAchievement] = []
+
         result = []
         for achievement in achievements:
             progress = progress_map.get(achievement.id)
             earned = earned_map.get(achievement.id)
 
             current_value = progress.current_value if progress else 0.0
+            is_viewed = earned.is_viewed if earned else None
+
+            if earned and not earned.is_viewed:
+                unviewed.append(earned)
 
             result.append(
                 AchievementProgressSchema(
@@ -560,8 +566,16 @@ class AchievementService:
                     else 0.0,
                     is_earned=earned is not None,
                     earned_at=earned.earned_at if earned else None,
+                    is_viewed=is_viewed,
                 )
             )
+
+        if unviewed:
+            for record in unviewed:
+                record.is_viewed = True
+            await self.uow.commit()
+
+        result.sort(key=lambda a: (2 if a.is_viewed is None else int(a.is_viewed)))
 
         return result
 

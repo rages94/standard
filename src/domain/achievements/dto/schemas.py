@@ -33,6 +33,7 @@ class AchievementProgressSchema(BaseModel):
     percentage: float = Field(default=0.0)
     is_earned: bool = Field(default=False)
     earned_at: datetime | None = None
+    is_viewed: bool | None = None
 
 
 class EarnedAchievementSchema(BaseModel):
