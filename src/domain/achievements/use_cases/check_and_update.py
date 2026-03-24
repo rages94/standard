@@ -17,13 +17,15 @@ class CheckAndUpdateAchievements:
         user_id: UUID,
         standard_id: UUID | None = None,
         activity_date: date | None = None,
+        uow: UnitOfWork | None = None,
     ) -> tuple[list[Achievement], list[Achievement]]:
-        async with self.uow:
-            service = AchievementService(self.uow)
+        uow = uow or self.uow
+        async with uow:
+            service = AchievementService(uow)
             granted, revoked = await service.check_and_update_achievements(
                 user_id=user_id,
                 standard_id=standard_id,
                 activity_date=activity_date,
             )
-            await self.uow.commit()
+            await uow.commit()
             return (granted, revoked)

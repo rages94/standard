@@ -16,6 +16,7 @@ from src.data.models.completed_standard import (
     CompletedStandardUpdate,
     NormalizationCompletedStandardPublic,
 )
+from src.data.models.standard import StandardPublic
 from src.data.uow import UnitOfWork
 from src.domain.achievements.use_cases.check_and_update import (
     CheckAndUpdateAchievements,
@@ -52,9 +53,8 @@ async def create_completed_standard(  # TODO check weightlifting(write tests)
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> CompletedStandardWithAchievements:
     user_id = credentials["id"]
-    granted: list = []
 
-    async with uow:  # TODO use_case
+    async with uow:
         standard = await uow.standard_repo.get_one(dict(id=body.standard_id))
 
         if body.weight:
@@ -89,15 +89,25 @@ async def create_completed_standard(  # TODO check weightlifting(write tests)
         await uow.refresh(completed_standard)
         await uow.refresh(standard)
 
-        # Сериализуем внутри блока, пока сессия активна
-        cs_public = CompletedStandardPublic.model_validate(completed_standard)
+        # Проверяем и обновляем достижения внутри той же сессии
+        granted, _ = await check_and_update_achievements(
+            user_id=user_id,
+            standard_id=standard.id,
+            activity_date=datetime.now().date(),
+            uow=uow,
+        )
 
-    # Проверяем и обновляем достижения (отдельная транзакция)
-    granted, _ = await check_and_update_achievements(
-        user_id=user_id,
-        standard_id=standard.id,
-        activity_date=datetime.now().date(),
-    )
+        # Сериализуем после achievements, форсируя загрузку relationships
+        cs_public = CompletedStandardPublic(
+            id=completed_standard.id,
+            count=completed_standard.count,
+            weight=completed_standard.weight,
+            user_weight=completed_standard.user_weight,
+            total_norm=completed_standard.total_norm,
+            created_at=completed_standard.created_at,
+            user_id=completed_standard.user_id,
+            standard=StandardPublic.model_validate(standard),
+        )
 
     return CompletedStandardWithAchievements(
         completed_standard=cs_public,
@@ -254,15 +264,27 @@ async def update_completed_standard(
         await uow.commit()
         await uow.refresh(completed_standard)
 
-        # Сериализуем внутри блока, пока сессия активна
-        cs_public = CompletedStandardPublic.model_validate(completed_standard)
+        # Проверяем и обновляем достижения внутри той же сессии
+        standard = await uow.standard_repo.get_one(
+            dict(id=completed_standard.standard_id)
+        )
+        granted, _ = await check_and_update_achievements(
+            user_id=user_id,
+            standard_id=completed_standard.standard_id,
+            activity_date=datetime.now().date(),
+            uow=uow,
+        )
 
-    # Проверяем и обновляем достижения (отдельная транзакция)
-    granted, _ = await check_and_update_achievements(
-        user_id=user_id,
-        standard_id=completed_standard.standard_id,
-        activity_date=datetime.now().date(),
-    )
+        cs_public = CompletedStandardPublic(
+            id=completed_standard.id,
+            count=completed_standard.count,
+            weight=completed_standard.weight,
+            user_weight=completed_standard.user_weight,
+            total_norm=completed_standard.total_norm,
+            created_at=completed_standard.created_at,
+            user_id=completed_standard.user_id,
+            standard=StandardPublic.model_validate(standard),
+        )
 
     return CompletedStandardWithAchievements(
         completed_standard=cs_public,
