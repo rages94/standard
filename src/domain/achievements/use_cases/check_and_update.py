@@ -10,7 +10,7 @@ class CheckAndUpdateAchievements:
     """Проверить и обновить достижения пользователя"""
 
     def __init__(self, uow: UnitOfWork):
-        self.uow = uow
+        self.uow = uow  # TODO delete
 
     async def __call__(
         self,
@@ -19,13 +19,11 @@ class CheckAndUpdateAchievements:
         activity_date: date | None = None,
         uow: UnitOfWork | None = None,
     ) -> tuple[list[Achievement], list[Achievement]]:
-        uow = uow or self.uow
-        async with uow:
-            service = AchievementService(uow)
-            granted, revoked = await service.check_and_update_achievements(
-                user_id=user_id,
-                standard_id=standard_id,
-                activity_date=activity_date,
-            )
-            await uow.commit()
-            return (granted, revoked)
+        service = AchievementService(uow)
+        granted, revoked = await service.check_and_update_achievements(
+            user_id=user_id,
+            standard_id=standard_id,
+            activity_date=activity_date,
+        )
+        await uow.commit()
+        return (granted, revoked)
