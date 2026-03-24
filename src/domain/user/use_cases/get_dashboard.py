@@ -27,13 +27,6 @@ class GetDashboard:
                 )
             )
 
-            if user.max_daily_norm < today_norm:
-                user.max_daily_norm = today_norm
-            if user.max_weekly_norm < week_norm:
-                user.max_weekly_norm = week_norm
-            if user.max_daily_norm == today_norm or user.max_weekly_norm == week_norm:
-                await self.uow.user_repo.update_model(user)
-                await self.uow.commit()
 
         return DashboardResponse(
             user=user,
