@@ -25,5 +25,4 @@ class CheckAndUpdateAchievements:
             standard_id=standard_id,
             activity_date=activity_date,
         )
-        await uow.commit()
-        return (granted, revoked)
+        return granted, revoked

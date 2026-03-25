@@ -108,11 +108,13 @@ async def create_completed_standard(  # TODO check weightlifting(write tests)
             user_id=completed_standard.user_id,
             standard=StandardPublic.model_validate(standard),
         )
+        response = CompletedStandardWithAchievements(
+            completed_standard=cs_public,
+            new_achievements=achievements_to_progress_schemas(granted),
+        )
+        await uow.commit()
 
-    return CompletedStandardWithAchievements(
-        completed_standard=cs_public,
-        new_achievements=achievements_to_progress_schemas(granted),
-    )
+    return response
 
 
 @completed_standard_router.put(
@@ -285,11 +287,13 @@ async def update_completed_standard(
             user_id=completed_standard.user_id,
             standard=StandardPublic.model_validate(standard),
         )
+        repsonse = CompletedStandardWithAchievements(
+            completed_standard=cs_public,
+            new_achievements=achievements_to_progress_schemas(granted),
+        )
+        await uow.commit()
 
-    return CompletedStandardWithAchievements(
-        completed_standard=cs_public,
-        new_achievements=achievements_to_progress_schemas(granted),
-    )
+    return repsonse
 
 
 @completed_standard_router.delete(
@@ -321,7 +325,6 @@ async def delete_completed_standard(
                 await uow.credit_repo.update_completed_count(user_id, int(-total_norm))
             except NoResultFound:
                 pass
-        await uow.commit()
 
         # Проверяем и обновляем достижения
         await check_and_update_achievements(
@@ -329,3 +332,4 @@ async def delete_completed_standard(
             standard_id=standard_id,
             activity_date=datetime.now().date(),
         )
+        await uow.commit()
