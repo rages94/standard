@@ -331,5 +331,6 @@ async def delete_completed_standard(
             user_id=user_id,
             standard_id=standard_id,
             activity_date=datetime.now().date(),
+            uow=uow,
         )
         await uow.commit()
