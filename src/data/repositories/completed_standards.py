@@ -144,32 +144,3 @@ class CompletedStandardRepository(
             )
             for standard_name, ratings in data.items()
         ]
-
-    async def get_today_norm(self, user_id: UUID) -> float:
-        now = moscow_now()
-        today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        today_end = (now + timedelta(days=1)).replace(
-            hour=0, minute=0, second=0, microsecond=0
-        )
-        query = (
-            select(func.sum(CompletedStandard.total_norm))
-            .where(CompletedStandard.user_id == user_id)
-            .where(CompletedStandard.created_at >= today_start)
-            .where(CompletedStandard.created_at < today_end)
-        )
-        result = await self.session.execute(query)
-        return float(result.scalar() or 0)
-
-    async def get_week_norm(self, user_id: UUID) -> float:
-        now = moscow_now()
-        week_start = now - timedelta(days=now.weekday())
-        week_start = week_start.replace(hour=0, minute=0, second=0, microsecond=0)
-        week_end = week_start + timedelta(days=7)
-        query = (
-            select(func.sum(CompletedStandard.total_norm))
-            .where(CompletedStandard.user_id == user_id)
-            .where(CompletedStandard.created_at >= week_start)
-            .where(CompletedStandard.created_at < week_end)
-        )
-        result = await self.session.execute(query)
-        return float(result.scalar() or 0)

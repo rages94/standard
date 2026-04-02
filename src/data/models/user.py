@@ -13,11 +13,13 @@ if TYPE_CHECKING:
         AuthLink,
         CompletedStandard,
         Credit,
+        DailyStats,
         Liability,
         LiabilityTemplate,
         Message,
         UserAchievement,
         UserAchievementProgress,
+        UserRecord,
         UserStreak,
     )
 
@@ -39,12 +41,6 @@ class User(TimestampMixin, SQLModel, table=True):
     total_liabilities: float | None = Field(default=0, nullable=True)
     telegram_chat_id: int | None = Field(nullable=True, index=True)
     completed_type: str | None = Field(CompletedType.count.value, nullable=True)
-    max_daily_norm: float = Field(
-        default=0, nullable=False, sa_column_kwargs={"server_default": "0"}
-    )
-    max_weekly_norm: float = Field(
-        default=0, nullable=False, sa_column_kwargs={"server_default": "0"}
-    )
 
     completed_standards: list["CompletedStandard"] = Relationship(back_populates="user")
     liabilities: list["Liability"] = Relationship(back_populates="user")
@@ -57,6 +53,8 @@ class User(TimestampMixin, SQLModel, table=True):
         back_populates="user"
     )
     streak: "UserStreak" = Relationship(back_populates="user")
+    daily_stats: list["DailyStats"] = Relationship(back_populates="user")
+    user_records: list["UserRecord"] = Relationship(back_populates="user")
 
     @staticmethod
     def get_password_hash(password: str) -> str:
@@ -76,8 +74,6 @@ class UserPublic(SQLModel):
     birthday: datetime | None
     total_liabilities: float | None
     completed_type: str | None
-    max_daily_norm: float
-    max_weekly_norm: float
 
 
 class UserCreate(SQLModel):

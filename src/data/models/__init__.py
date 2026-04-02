@@ -7,6 +7,7 @@ from .achievement import (
 from .auth_link import AuthLink
 from .completed_standard import CompletedStandard
 from .credit import Credit
+from .daily_stats import DailyStats, DailyStatsPublic
 from .liability import Liability
 from .liability_template import LiabilityTemplate
 from .message import Message
@@ -19,6 +20,7 @@ from .user_achievement import (
     UserAchievementProgressPublic,
     UserAchievementPublic,
 )
+from .user_record import UserRecord, UserRecordPublic
 from .user_streak import UserStreak, UserStreakPublic
 
 __all__ = [
@@ -41,4 +43,8 @@ __all__ = [
     "AchievementWithProgress",
     "UserStreak",
     "UserStreakPublic",
+    "DailyStats",
+    "DailyStatsPublic",
+    "UserRecord",
+    "UserRecordPublic",
 ]

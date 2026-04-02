@@ -53,6 +53,8 @@ from src.domain.user.use_cases.check_auth_chat import AuthChatManager
 from src.domain.user.use_cases.get import GetUser
 from src.domain.user.use_cases.get_dashboard import GetDashboard
 from src.domain.user.use_cases.list import ListUsers
+from src.domain.user_records.use_cases.get_records import GetRecords
+from src.domain.user_records.use_cases.update_records import UpdateRecords
 
 
 class UseCasesContainer(containers.DeclarativeContainer):
@@ -194,3 +196,7 @@ class UseCasesContainer(containers.DeclarativeContainer):
     check_and_update_achievements = providers.Factory(
         CheckAndUpdateAchievements, uow=repositories.uow
     )
+
+    # user records use cases
+    update_records = providers.Factory(UpdateRecords)
+    get_records = providers.Factory(GetRecords, uow=repositories.uow)

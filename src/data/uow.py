@@ -1,10 +1,12 @@
 from src.common.uow.uow import BaseUnitOfWork
 from src.data.repositories.auth_link import AuthLinkRepository
 from src.data.repositories.completed_standards import CompletedStandardRepository
+from src.data.repositories.daily_stats import DailyStatsRepository
 from src.data.repositories.liabilities import LiabilityRepository
 from src.data.repositories.liability_templates import LiabilityTemplateRepository
 from src.data.repositories.message import MessageRepository
 from src.data.repositories.standards import StandardRepository
+from src.data.repositories.user_records import UserRecordRepository
 from src.data.repositories.users import UserRepository
 from src.data.repositories.credits import CreditRepository
 from src.data.repositories.achievements import (
@@ -32,3 +34,5 @@ class UnitOfWork(BaseUnitOfWork):
             self.session
         )
         self.user_streak_repo = UserStreakRepository(self.session)
+        self.daily_stats_repo = DailyStatsRepository(self.session)
+        self.user_record_repo = UserRecordRepository(self.session)

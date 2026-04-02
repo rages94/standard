@@ -1,4 +1,6 @@
-from polyfactory import AsyncPersistenceProtocol
+from decimal import Decimal
+
+from polyfactory import AsyncPersistenceProtocol, Use
 from polyfactory.factories.pydantic_factory import ModelFactory
 
 from src.containers.container import container
@@ -20,6 +22,7 @@ class StandardFactory(ModelFactory[Standard]):
     __check_model__ = False
     __allow_none_optionals__ = False
     __async_persistence__ = AsyncPersistenceHandler
+    count = Use(lambda: Decimal(str(__import__("random").uniform(1.0, 100.0))))
 
 
 class StandardCreateFactory(ModelFactory[StandardCreate]):

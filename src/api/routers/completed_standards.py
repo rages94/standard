@@ -29,6 +29,7 @@ from src.domain.completed_standards.dto.output import (
     achievements_to_progress_schemas,
 )
 from src.domain.math.services.normalization import ExerciseNormalizationService
+from src.domain.user_records.use_cases.update_records import UpdateRecords
 
 settings = Settings()
 completed_standard_router = APIRouter()
@@ -50,6 +51,7 @@ async def create_completed_standard(  # TODO check weightlifting(write tests)
     check_and_update_achievements: CheckAndUpdateAchievements = Depends(
         Provide["use_cases.check_and_update_achievements"]
     ),
+    update_records: UpdateRecords = Depends(Provide["use_cases.update_records"]),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> CompletedStandardWithAchievements:
     user_id = credentials["id"]
@@ -89,7 +91,6 @@ async def create_completed_standard(  # TODO check weightlifting(write tests)
         await uow.refresh(completed_standard)
         await uow.refresh(standard)
 
-        # Проверяем и обновляем достижения внутри той же сессии
         granted, _ = await check_and_update_achievements(
             user_id=user_id,
             standard_id=standard.id,
@@ -97,7 +98,9 @@ async def create_completed_standard(  # TODO check weightlifting(write tests)
             uow=uow,
         )
 
-        # Сериализуем после achievements, форсируя загрузку relationships
+        activity_date = datetime.now().date()
+        await update_records(uow, user_id, activity_date, total_norm)
+
         cs_public = CompletedStandardPublic(
             id=completed_standard.id,
             count=completed_standard.count,
@@ -214,6 +217,7 @@ async def update_completed_standard(
     check_and_update_achievements: CheckAndUpdateAchievements = Depends(
         Provide["use_cases.check_and_update_achievements"]
     ),
+    update_records: UpdateRecords = Depends(Provide["use_cases.update_records"]),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> CompletedStandardWithAchievements:
     user_id = credentials["id"]
@@ -223,6 +227,7 @@ async def update_completed_standard(
         )
 
         old_total_norm = completed_standard.total_norm or 0
+        old_date = completed_standard.created_at.date()
 
         for k, v in body.model_dump(exclude_none=True).items():
             setattr(completed_standard, k, v)
@@ -266,7 +271,6 @@ async def update_completed_standard(
         await uow.commit()
         await uow.refresh(completed_standard)
 
-        # Проверяем и обновляем достижения внутри той же сессии
         standard = await uow.standard_repo.get_one(
             dict(id=completed_standard.standard_id)
         )
@@ -276,6 +280,15 @@ async def update_completed_standard(
             activity_date=datetime.now().date(),
             uow=uow,
         )
+
+        new_date = completed_standard.created_at.date()
+        if old_date == new_date:
+            await update_records(uow, user_id, new_date, norm_diff)
+        else:
+            await update_records.recalculate_after_delete(uow, user_id, old_date)
+            await update_records(
+                uow, user_id, new_date, completed_standard.total_norm or 0
+            )
 
         cs_public = CompletedStandardPublic(
             id=completed_standard.id,
@@ -307,6 +320,7 @@ async def delete_completed_standard(
     check_and_update_achievements: CheckAndUpdateAchievements = Depends(
         Provide["use_cases.check_and_update_achievements"]
     ),
+    update_records: UpdateRecords = Depends(Provide["use_cases.update_records"]),
     credentials: JwtAuthorizationCredentials = Security(access_bearer),
 ) -> None:
     user_id = credentials["id"]
@@ -316,6 +330,7 @@ async def delete_completed_standard(
         )
         standard_id = completed_standard.standard_id
         total_norm = completed_standard.total_norm or 0
+        activity_date = completed_standard.created_at.date()
 
         await uow.completed_standard_repo.delete(completed_standard_id)
         await uow.flush()
@@ -326,11 +341,13 @@ async def delete_completed_standard(
             except NoResultFound:
                 pass
 
-        # Проверяем и обновляем достижения
         await check_and_update_achievements(
             user_id=user_id,
             standard_id=standard_id,
             activity_date=datetime.now().date(),
             uow=uow,
         )
+
+        await update_records.recalculate_after_delete(uow, user_id, activity_date)
+
         await uow.commit()
