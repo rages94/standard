@@ -227,7 +227,6 @@ async def update_completed_standard(
         )
 
         old_total_norm = completed_standard.total_norm or 0
-        old_date = completed_standard.created_at.date()
 
         for k, v in body.model_dump(exclude_none=True).items():
             setattr(completed_standard, k, v)
@@ -281,14 +280,9 @@ async def update_completed_standard(
             uow=uow,
         )
 
-        new_date = completed_standard.created_at.date()
-        if old_date == new_date:
-            await update_records(uow, user_id, new_date, norm_diff)
-        else:
-            await update_records.recalculate_after_delete(uow, user_id, old_date)
-            await update_records(
-                uow, user_id, new_date, completed_standard.total_norm or 0
-            )
+        await update_records(
+            uow, user_id, completed_standard.created_at.date(), norm_diff
+        )
 
         cs_public = CompletedStandardPublic(
             id=completed_standard.id,

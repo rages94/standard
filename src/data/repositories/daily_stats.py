@@ -78,3 +78,21 @@ class DailyStatsRepository(Repository[DailyStats, DailyStatsFilterSet, AsyncSess
         )
         result = await self.session.execute(query)
         return float(result.scalar() or 0)
+
+    async def get_max_daily(self, user_id: UUID) -> float:
+        query = select(func.max(DailyStats.total_count)).where(
+            DailyStats.user_id == user_id
+        )
+        result = await self.session.execute(query)
+        return float(result.scalar() or 0)
+
+    async def get_max_weekly(self, user_id: UUID) -> float:
+        subq = (
+            select(func.sum(DailyStats.total_count).label("week_total"))
+            .where(DailyStats.user_id == user_id)
+            .group_by(func.date_trunc("week", DailyStats.date))
+            .subquery()
+        )
+        query = select(func.max(subq.c.week_total))
+        result = await self.session.execute(query)
+        return float(result.scalar() or 0)

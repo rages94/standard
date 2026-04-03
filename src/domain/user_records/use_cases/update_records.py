@@ -37,10 +37,7 @@ class UpdateRecords:
         )
         await uow.flush()
 
-        records = await uow.user_record_repo.get_records(user_id)
-        current_daily = records.get("daily", 0)
-        if daily_total < current_daily:
-            await self._find_and_set_best_daily(uow, user_id)
+        await self._update_daily_record(uow, user_id, daily_total)
 
         now = moscow_now()
         week_start = (now - timedelta(days=now.weekday())).date()
@@ -48,9 +45,7 @@ class UpdateRecords:
         week_total = await uow.daily_stats_repo.get_week_total(
             user_id, week_start, week_end
         )
-        current_weekly = records.get("weekly", 0)
-        if week_total < current_weekly:
-            await self._find_and_set_best_weekly(uow, user_id)
+        await self._update_weekly_record(uow, user_id, week_total)
 
     async def _update_daily_record(
         self, uow: UnitOfWork, user_id: UUID, daily_total: float
@@ -73,6 +68,8 @@ class UpdateRecords:
                 }
             )
             logger.info(f"Daily record updated for user {user_id}: {daily_total}")
+        elif daily_total < current_daily:
+            await self._find_and_set_best_daily(uow, user_id)
 
     async def _update_weekly_record(
         self, uow: UnitOfWork, user_id: UUID, week_total: float
@@ -95,18 +92,18 @@ class UpdateRecords:
                 }
             )
             logger.info(f"Weekly record updated for user {user_id}: {week_total}")
+        elif week_total < current_weekly:
+            await self._find_and_set_best_weekly(uow, user_id)
 
     async def _find_and_set_best_daily(self, uow: UnitOfWork, user_id: UUID) -> None:
-        daily_stats = await uow.daily_stats_repo.filter({"user_id": user_id})
-        if not daily_stats:
+        best_daily = await uow.daily_stats_repo.get_max_daily(user_id)
+        if best_daily == 0:
             existing = await uow.user_record_repo.filter(
                 {"user_id": user_id, "type": "daily"}
             )
             for rec in existing:
                 await uow.user_record_repo.delete(rec.id)
             return
-
-        best = max(daily_stats, key=lambda s: s.total_count)
 
         existing = await uow.user_record_repo.filter(
             {"user_id": user_id, "type": "daily"}
@@ -118,30 +115,20 @@ class UpdateRecords:
             {
                 "user_id": user_id,
                 "type": "daily",
-                "count": best.total_count,
+                "count": best_daily,
             }
         )
-        logger.info(f"Daily record recalculated for user {user_id}: {best.total_count}")
+        logger.info(f"Daily record recalculated for user {user_id}: {best_daily}")
 
     async def _find_and_set_best_weekly(self, uow: UnitOfWork, user_id: UUID) -> None:
-        daily_stats = await uow.daily_stats_repo.filter({"user_id": user_id})
-        if not daily_stats:
+        best_weekly = await uow.daily_stats_repo.get_max_weekly(user_id)
+        if best_weekly == 0:
             existing = await uow.user_record_repo.filter(
                 {"user_id": user_id, "type": "weekly"}
             )
             for rec in existing:
                 await uow.user_record_repo.delete(rec.id)
             return
-
-        week_totals: dict[date, float] = {}
-        for stat in daily_stats:
-            week_start = stat.date - timedelta(days=stat.date.weekday())
-            week_totals[week_start] = week_totals.get(week_start, 0) + stat.total_count
-
-        if not week_totals:
-            return
-
-        best_week = max(week_totals.values())
 
         existing = await uow.user_record_repo.filter(
             {"user_id": user_id, "type": "weekly"}
@@ -153,7 +140,7 @@ class UpdateRecords:
             {
                 "user_id": user_id,
                 "type": "weekly",
-                "count": best_week,
+                "count": best_weekly,
             }
         )
-        logger.info(f"Weekly record recalculated for user {user_id}: {best_week}")
+        logger.info(f"Weekly record recalculated for user {user_id}: {best_weekly}")

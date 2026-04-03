@@ -12,6 +12,8 @@ class DashboardResponse(SQLModel):
     user: UserPublic
     current_credit: CreditPublic | None
     streak: UserStreakPublic | None
+    today_norm: float
+    week_norm: float
     daily_record: float
     weekly_record: float
     nearest_achievement: UserAchievementProgressWithAchievement | None = None
